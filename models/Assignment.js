@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const AssignmentSchema = new mongoose.Schema({
     title: {
       type: String,
