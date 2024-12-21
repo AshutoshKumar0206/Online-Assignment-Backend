@@ -128,7 +128,7 @@ module.exports.signin = async (req, res, next) => {
 }
 
 // Send OTP For Email Verification
-exports.sendotp = async (req, res) => {
+module.exports.sendotp = async (req, res) => {
     try {
       const { email } = req.body
   

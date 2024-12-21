@@ -21,7 +21,7 @@ app.use(express.urlencoded({extended: true}));
 app.use("/", indexRoutes);
 app.use("/user", userRoutes);
 
-const users = {};//To store active users and select the users to chat with
+const users = {}; //To store active users and select the users to chat with
 io.on('connection', (socket) => {
 console.log('user connected:', socket.id);
 
