@@ -23,7 +23,7 @@ app.use("/", indexRoutes);
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);
 
-const users = {};//To store active users and select the users to chat with
+const users = {}; //To store active users and select the users to chat with
 io.on('connection', (socket) => {
 console.log('user connected:', socket.id);
 

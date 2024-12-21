@@ -63,7 +63,7 @@ module.exports.signin = async (req, res, next) => {
       });
     }
 
-    const user = await userModel.findOne({ email });
+  const user = await userModel.findOne({ email });
 
     if (!user) {
       return res.status(401).json({
