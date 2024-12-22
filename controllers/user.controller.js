@@ -28,7 +28,7 @@ module.exports.signup = async (req, res, next) => {
     if (isUserAlreadyExist || isPendingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists or is pending admin approval.",
+        message: "User already exists or requires Admin approval.",
       });
     }
 
@@ -39,13 +39,13 @@ module.exports.signup = async (req, res, next) => {
       lastName,
       email,
       password: hashedPassword,
-      role, // Default role; admin will confirm
+      role, // Default role; admin will confirm the role
     });
 
     await newUser.save();
 
     res.status(201).json({
-      message: "Signup successful. Pending admin approval.",
+      message: "Signup successful. Admin approval Pending.",
     });
   } catch (err) {
     next(err);
@@ -167,7 +167,7 @@ module.exports.logout = async (req, res, next) => {
     await BlacklistModel.create({ token });
 
     res.status(200).json({
-      message: "Logout successful",
+      message: "User Logged out",
     });
   } catch (err) {
     next(err);
