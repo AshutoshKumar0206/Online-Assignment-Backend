@@ -39,7 +39,7 @@ module.exports.signup = async (req, res, next) => {
       lastName,
       email,
       password: hashedPassword,
-      role, // Default role; admin will confirm
+      role, // Default role; admin will confirm the role
     });
 
     await newUser.save();
