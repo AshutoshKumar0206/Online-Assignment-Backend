@@ -4,7 +4,7 @@ const userController = require("../controllers/user.controller");
 const { adminLogin, adminLogout, verifyAdmin } = require("../controllers/admin.controller");
 
 // Admin Login and Logout Routes
-router.post("/login", adminLogin); // Admin login
+router.post("/signin", adminLogin); // Admin login
 router.post("/logout", verifyAdmin, adminLogout); // Admin logout
 
 // Admin Routes for Pending Users
