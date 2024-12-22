@@ -146,6 +146,33 @@ module.exports.sendotp = async (req, res) => {
   }
 };
 
+module.exports.verifyotp = async (req, res) => {
+try{
+const {otp, userId} = req.body;
+if(!otp || !userId){
+    return res.status(400).json({
+      success:false,
+      message: 'OTP and User ID are required'
+  });
+}
+const Otp = await OTP.findOne({ otp: otp });
+// const user = await userModel.findOne({ userId: userId });
+
+// if (userId !== user) {
+//   return res.status(404).json({ message: 'User not found.' });
+// }
+
+if (otp !== Otp) {
+  return res.status(401).json({ message: 'Invalid OTP.' });
+}
+
+// If OTP is verified successfully
+return res.status(200).json({ message: 'OTP verified successfully.' }); 
+} catch (err) {
+    next(err); 
+}
+}
+
 module.exports.logout = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
