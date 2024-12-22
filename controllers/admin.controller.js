@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-
+const crypto = require("crypto");
 // Hardcoded Admin Credentials
 const adminEmail = "admin@bitmesra.ac.in";
 const adminPassword = process.env.ADMIN_PASSWORD; // Store hashed password in .env file
@@ -16,6 +16,7 @@ module.exports.adminLogin = async (req, res, next) => {
         message: "Please fill all required fields",
       });
     }
+console.log("typed email", email);
 
     if (email !== adminEmail) {
       return res.status(401).json({
@@ -23,18 +24,19 @@ module.exports.adminLogin = async (req, res, next) => {
         message: "Invalid email",
       });
     }
+    // const hashedPassword = await bcrypt.hash(password, 10);
+    // const adminHashedPassword = await bcrypt.hash(adminPassword, 10);
+    // const isPasswordCorrect = await bcrypt.compare(hashedPassword, adminHashedPassword);
 
-    const isPasswordCorrect = await bcrypt.compare(password, adminPassword);
-
-    if (!isPasswordCorrect) {
+    if (password !== adminPassword) {
       return res.status(401).json({
         success: false,
         message: "Invalid password",
       });
     }
-
-    const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
+    // const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = crypto.randomBytes(20).toString("hex");
+    
     const options = {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       httpOnly: true,
