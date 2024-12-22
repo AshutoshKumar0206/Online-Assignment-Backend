@@ -5,6 +5,8 @@ const bcrypt = require("bcrypt");
 const BlacklistModel = require("../models/blacklist.model");
 const otpGenerator = require("otp-generator");
 const OTP = require("../models/Otp");
+const emailTemplate = require("../mail/emailVerificationTemplate");
+const mailSender = require("../utils/mailSender");
 
 module.exports.signup = async (req, res, next) => {
   try {
@@ -45,6 +47,8 @@ module.exports.signup = async (req, res, next) => {
     await newUser.save();
 
     res.status(201).json({
+      success: true,
+      newUser,
       message: "Signup successful. Admin approval Pending.",
     });
   } catch (err) {
@@ -134,6 +138,12 @@ module.exports.sendotp = async (req, res) => {
 
     const otpPayload = { email, otp };
     const otpBody = await OTP.create(otpPayload);
+    const mailResponse = await mailSender(
+      email,
+      "Verification email",
+      emailTemplate(otp)
+    )
+    console.log("mail response:", mailResponse);
 
     res.status(200).json({
       success: true,
@@ -148,7 +158,7 @@ module.exports.sendotp = async (req, res) => {
 
 module.exports.verifyotp = async (req, res) => {
 try{
-const {otp, email} = req.body;
+const { otp, email } = req.body;
 console.log(otp);
 if(!otp || !email) {
     return res.status(400).json({
@@ -156,16 +166,16 @@ if(!otp || !email) {
       message: 'OTP and Email are required'
   });
 }
-const Otp = await OTP.findOne({email: email, otp: otp });
-console.log('hello',Otp.otp);
-if (otp !== Otp.otp) {
+const Otp = await OTP.findOne({ email, otp });
+if (!Otp) {
   return res.status(401).json({ message: 'Invalid OTP.' });
 }
 
 // If OTP is verified successfully
 return res.status(200).json({ message: 'OTP verified successfully.' }); 
 } catch (err) {
-    next(err); 
+    console.log(err.message);
+    return res.status(500).json({ message: "OTP not verified" });
 }
 }
 
