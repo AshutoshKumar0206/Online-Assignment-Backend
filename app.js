@@ -1,6 +1,7 @@
 const express = require("express");
 const app= express();
 require("dotenv").config();
+const cors = require("cors");
 const connectDB = require("./config/mongodb");
 const indexRoutes = require("./routes/index.route");
 const userRoutes = require("./routes/user.routes");
@@ -8,6 +9,7 @@ const adminRoutes = require("./routes/admin.route");
 const PORT = process.env.PORT || 4000;
 
 //To initialize a server
+const http = require("http");
 const { Server } = require("socket.io");
 const server = http.createServer(app);
 const io = new Server(server);
@@ -18,7 +20,7 @@ connectDB();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-
+app.use(cors);
 app.use("/", indexRoutes);
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);
