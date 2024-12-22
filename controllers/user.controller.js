@@ -28,7 +28,7 @@ module.exports.signup = async (req, res, next) => {
     if (isUserAlreadyExist || isPendingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists or is pending admin approval.",
+        message: "User already exists or requires Admin approval.",
       });
     }
 
@@ -45,7 +45,7 @@ module.exports.signup = async (req, res, next) => {
     await newUser.save();
 
     res.status(201).json({
-      message: "Signup successful. Pending admin approval.",
+      message: "Signup successful. Admin approval Pending.",
     });
   } catch (err) {
     next(err);
