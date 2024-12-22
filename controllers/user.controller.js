@@ -109,7 +109,7 @@ module.exports.sendotp = async (req, res) => {
   try {
     const { email } = req.body;
 
-    const checkUserPresent = await userModel.findOne({ email });
+    const checkUserPresent = await userModel.findOne({ email: email });
 
     if (checkUserPresent) {
       return res.status(401).json({
@@ -149,15 +149,16 @@ module.exports.sendotp = async (req, res) => {
 module.exports.verifyotp = async (req, res) => {
 try{
 const {otp, email} = req.body;
-if(!otp || !email){
+console.log(otp);
+if(!otp || !email) {
     return res.status(400).json({
       success:false,
       message: 'OTP and Email are required'
   });
 }
-const Otp = await OTP.findOne({email: email,  otp: otp });
-
-if (otp !== Otp) {
+const Otp = await OTP.findOne({email: email, otp: otp });
+console.log('hello',Otp.otp);
+if (otp !== Otp.otp) {
   return res.status(401).json({ message: 'Invalid OTP.' });
 }
 
