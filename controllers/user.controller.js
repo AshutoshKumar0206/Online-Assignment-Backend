@@ -152,7 +152,7 @@ const {otp, email} = req.body;
 if(!otp || !email){
     return res.status(400).json({
       success:false,
-      message: 'OTP and User ID are required'
+      message: 'OTP and Email are required'
   });
 }
 const Otp = await OTP.findOne({email: email,  otp: otp });
