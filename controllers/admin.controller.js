@@ -153,3 +153,27 @@ module.exports.approveUser = async (req, res, next) => {
     next(err);
   }
 };
+
+//To delete a specific user not verified by admin
+module.exports.deletePendingUser = async(req, res, next) => {
+  const userId = req.params.id;
+  try {
+    const deletedUser = await pendingUserModel.findByIdAndDelete(userId);
+    if (deletedUser) {
+      res.status(200).json({
+        success:true,
+        message: "User deleted successfully", 
+        user: deletedUser });
+    } else {
+      res.status(404).json({
+        success:false,
+        message: "User not found" 
+      });
+    }
+  } catch (error) {
+    console.log(err);
+    res.status(500).json({ 
+      message: "Error in Deleting User"
+    });
+  }
+}
