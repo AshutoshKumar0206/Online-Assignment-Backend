@@ -1,8 +1,8 @@
 const userModel = require("../models/User");
 const jwt = require("jsonwebtoken");
-const blacklistModel = require("../models/blacklist");
+const blacklistModel = require("../models/blacklist.model");
 // Configuring dotenv to load environment variables from .env file
-dotenv.config();
+require('dotenv').config();
 exports.isAuthenticated = async (req, res, next) => {
     try {
         const token =
