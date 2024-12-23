@@ -51,7 +51,7 @@ console.log("typed email", email);
     // });
 
     // Fetch pending users
-    const pendingUsers = await notConfirmedModel.find({}, { password: 0 });
+    const pendingUsers = await pendingUserModel.find({}, { password: 0 });
 
     res.cookie("token", token, options).status(200).json({
       success: true,
