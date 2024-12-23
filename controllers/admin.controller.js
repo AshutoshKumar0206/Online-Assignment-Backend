@@ -36,8 +36,8 @@ console.log("typed email", email);
         message: "Invalid password",
       });
     }
-    // const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    const token = crypto.randomBytes(20).toString("hex");
+    const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    // const token = crypto.randomBytes(20).toString("hex");
     
     const options = {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
@@ -88,6 +88,8 @@ module.exports.adminLogout = async (req, res, next) => {
 module.exports.verifyAdmin = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
+    console.log(token);
+    console.log(token, " sasa ");
 
     if (!token) {
       return res.status(401).json({
@@ -127,7 +129,7 @@ module.exports.getPendingUsers = async (req, res, next) => {
 module.exports.approveUser = async (req, res, next) => {
   try {
     const { userId, role } = req.body;
-
+    console.log(userId, role);
     const currUser = await pendingUserModel.findById(userId);
     if (!currUser) {
       return res.status(404).json({

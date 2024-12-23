@@ -6,7 +6,7 @@ const connectDB = require("./config/mongodb");
 const indexRoutes = require("./routes/index.route");
 const userRoutes = require("./routes/user.routes");
 const adminRoutes = require("./routes/admin.route");
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8000;
 
 //To initialize a server
 const http = require("http");
@@ -15,14 +15,14 @@ const server = http.createServer(app);
 const io = new Server(server);
 app.use(express.static('public'))
 
-// app.use((req, res, next) =>{
-//     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
-//     res.header(
-//         'Access-Control-Allow-Methods', 
-//         'Origin, X-Requested-With, Content-Type, Accept'
-//     );
-//     next(); 
-// })
+app.use((req, res, next) =>{
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header(
+        'Access-Control-Allow-Methods', 
+        'Origin, X-Requested-With, Content-Type, Accept'
+    );
+    next(); 
+})
 //MongoDb Connection
 connectDB();
 
