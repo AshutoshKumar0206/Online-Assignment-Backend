@@ -1,12 +1,15 @@
 const userModel = require("../models/User");
 const adminModel = require("../models/Admin");
+const jwt = require("jsonwebtoken");
 const notConfirmedModel = require("../models/notConfirmed");
+const pendingUserModel = require("../models/pendingUser");
 const bcrypt = require("bcrypt");
 const BlacklistModel = require("../models/blacklist.model");
 const otpGenerator = require("otp-generator");
 const OTP = require("../models/Otp");
 const emailTemplate = require("../mail/emailVerificationTemplate");
 const mailSender = require("../utils/mailSender");
+
 
 module.exports.signup = async (req, res, next) => {
   try {
@@ -156,28 +159,57 @@ module.exports.sendotp = async (req, res) => {
   }
 };
 
-module.exports.verifyotp = async (req, res) => {
-try{
-const { otp, email } = req.body;
-console.log(otp);
-if(!otp || !email) {
-    return res.status(400).json({
-      success:false,
-      message: 'OTP and Email are required'
-  });
-}
-const Otp = await OTP.findOne({ email, otp });
-if (!Otp) {
-  return res.status(401).json({ message: 'Invalid OTP.' });
-}
 
-// If OTP is verified successfully
-return res.status(200).json({ message: 'OTP verified successfully.' }); 
-} catch (err) {
-    console.log(err.message);
-    return res.status(500).json({ message: "OTP not verified" });
-}
-}
+
+module.exports.verifyotp = async (req, res) => {
+  try {
+    const { otp, email, role } = req.body;
+
+    if (!otp || !email) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP and email are required",
+      });
+    }
+
+    const otpEntry = await OTP.findOne({ email, otp });
+    if (!otpEntry) {
+      return res.status(401).json({ message: "Invalid OTP." });
+    }
+
+    // Find the user in notConfirmedModel
+    const currUser = await notConfirmedModel.findOne({ email });
+    if (!currUser) {
+      return res.status(404).json({
+        message: "User not found in notConfirmed list.",
+      });
+    }
+
+    // Create a new entry in pendingUserModel
+    const approvedUser = new pendingUserModel({
+      firstName: currUser.firstName,
+      lastName: currUser.lastName,
+      email: currUser.email,
+      password: currUser.password,
+      role: role || "student", // Default to "student" if role is not provided
+    });
+
+    await approvedUser.save();
+    await notConfirmedModel.findByIdAndDelete(currUser._id); // Delete from notConfirmedModel
+    await OTP.deleteOne({ email, otp }); // Delete the OTP after successful verification
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully. User moved to pending list.",
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ message: "OTP verification failed" });
+  }
+};
+
+
+
 
 module.exports.logout = async (req, res, next) => {
   try {

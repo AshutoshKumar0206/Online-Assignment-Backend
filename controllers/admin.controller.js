@@ -2,8 +2,10 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 // Hardcoded Admin Credentials
-const adminEmail = "admin@bitmesra.ac.in";
+const adminEmail = process.env.ADMIN_EMAIL; 
 const adminPassword = process.env.ADMIN_PASSWORD; // Store hashed password in .env file
+const pendingUserModel = require("../models/pendingUser");
+const userModel = require("../models/User");
 
 // Admin Login
 module.exports.adminLogin = async (req, res, next) => {
@@ -110,9 +112,10 @@ module.exports.verifyAdmin = (req, res, next) => {
 };
 
 
+// Fetch Pending Users
 module.exports.getPendingUsers = async (req, res, next) => {
   try {
-    const pendingUsers = await notConfirmedModel.find({}, { password: 0 });
+    const pendingUsers = await pendingUserModel.find({}, { password: 0 });
     res.status(200).json(pendingUsers);
   } catch (err) {
     next(err);
@@ -120,27 +123,28 @@ module.exports.getPendingUsers = async (req, res, next) => {
 };
 
 
+// Approve User
 module.exports.approveUser = async (req, res, next) => {
   try {
     const { userId, role } = req.body;
 
-    const pendingUser = await notConfirmedModel.findById(userId);
-    if (!pendingUser) {
+    const currUser = await pendingUserModel.findById(userId);
+    if (!currUser) {
       return res.status(404).json({
         message: "User not found in pending list.",
       });
     }
 
     const approvedUser = new userModel({
-      firstName: pendingUser.firstName,
-      lastName: pendingUser.lastName,
-      email: pendingUser.email,
-      password: pendingUser.password,
+      firstName: currUser.firstName,
+      lastName: currUser.lastName,
+      email: currUser.email,
+      password: currUser.password,
       role,
     });
 
     await approvedUser.save();
-    await notConfirmedModel.findByIdAndDelete(userId);
+    await pendingUserModel.findByIdAndDelete(userId);
 
     res.status(200).json({
       message: "User approved successfully.",
