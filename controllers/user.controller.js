@@ -242,3 +242,33 @@ module.exports.logout = async (req, res, next) => {
 
 
 
+module.exports.dashboard = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    // Fetch the user from the database
+    const user = await userModel.findById(id).select("-password"); // Exclude the password field
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Return the user data
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (err) {
+    console.error("Error fetching user dashboard:", err);
+    next(err);
+  }
+};
+
+
+
+
+
+
