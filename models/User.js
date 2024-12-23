@@ -18,13 +18,9 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  confirmPassword: {
-    type: String,
-    required: true,
-  },
   role: {
     type: String,
-    enum: ['student', 'Teacher', 'Admin'],
+    enum: ['student', 'teacher'],
     default:'student',
   },
   createdAt: {
