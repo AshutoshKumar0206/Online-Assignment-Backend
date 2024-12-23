@@ -36,8 +36,8 @@ console.log("typed email", email);
         message: "Invalid password",
       });
     }
-    // const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    const token = crypto.randomBytes(20).toString("hex");
+    const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    // const token = crypto.randomBytes(20).toString("hex");
     
     const options = {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),

@@ -15,14 +15,14 @@ const server = http.createServer(app);
 const io = new Server(server);
 app.use(express.static('public'))
 
-// app.use((req, res, next) =>{
-//     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
-//     res.header(
-//         'Access-Control-Allow-Methods', 
-//         'Origin, X-Requested-With, Content-Type, Accept'
-//     );
-//     next(); 
-// })
+app.use((req, res, next) =>{
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header(
+        'Access-Control-Allow-Methods', 
+        'Origin, X-Requested-With, Content-Type, Accept'
+    );
+    next(); 
+})
 //MongoDb Connection
 connectDB();
 
