@@ -207,41 +207,6 @@ module.exports.logout = async (req, res, next) => {
   }
 };
 
-module.exports.getPendingUsers = async (req, res, next) => {
-  try {
-    const pendingUsers = await notConfirmedModel.find({}, { password: 0 });
-    res.status(200).json(pendingUsers);
-  } catch (err) {
-    next(err);
-  }
-};
 
-module.exports.approveUser = async (req, res, next) => {
-  try {
-    const { userId, role } = req.body;
 
-    const pendingUser = await notConfirmedModel.findById(userId);
-    if (!pendingUser) {
-      return res.status(404).json({
-        message: "User not found in pending list.",
-      });
-    }
 
-    const approvedUser = new userModel({
-      firstName: pendingUser.firstName,
-      lastName: pendingUser.lastName,
-      email: pendingUser.email,
-      password: pendingUser.password,
-      role,
-    });
-
-    await approvedUser.save();
-    await notConfirmedModel.findByIdAndDelete(userId);
-
-    res.status(200).json({
-      message: "User approved successfully.",
-    });
-  } catch (err) {
-    next(err);
-  }
-};
