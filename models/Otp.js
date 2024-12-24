@@ -34,22 +34,25 @@ async function sendVerificationEmail(email, otp) {
 			"Verification Email",
 			emailTemplate(otp)
 		);
-		// console.log("Email sent successfully: ", mailResponse);
+		console.log("Email sent successfully: ", mailResponse);
 	} catch (error) {
 		console.log("Error occurred while sending email: ", error);
 		throw error;
 	}
 }
-
+OTPSchema.add({
+	emailSent: { type: Boolean, default: false },
+})
 // Define a post-save hook to send email after the document has been saved
-OTPSchema.pre("save", async function (next) {
+OTPSchema.post("save", async function (next) {
 	console.log("New document saved to database");
 
 	// Only send an email when a new document is created
-	if (this.isNew) {
+	if (this.isNew && !this.emailSent) {
 		await sendVerificationEmail(this.email, this.otp);
+		this.emailSent = true;
+		await this.save();
 	}
-	next();
 });
 
 const OTP = mongoose.model("OTP", OTPSchema);
