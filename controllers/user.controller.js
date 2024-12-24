@@ -1,5 +1,4 @@
 const userModel = require("../models/User");
-const adminModel = require("../models/Admin");
 const jwt = require("jsonwebtoken");
 const notConfirmedModel = require("../models/notConfirmed");
 const pendingUserModel = require("../models/pendingUser");
