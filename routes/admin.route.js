@@ -24,6 +24,6 @@ router.get("/check", verifyAdmin, getPendingUsers);
 router.post("/approve", verifyAdmin, approveUser);
 
 //Route to delete pending users
-router.delete("/deletependinguser", verifyAdmin, deletePendingUser);
+router.delete("/deletependinguser/:id", verifyAdmin, deletePendingUser);
 
 module.exports = router;

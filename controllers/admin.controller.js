@@ -77,6 +77,7 @@ module.exports.adminLogout = async (req, res, next) => {
 
     res.clearCookie("token");
     res.status(200).json({
+      success:true,
       message: "Admin logout successful",
     });
   } catch (err) {
@@ -149,6 +150,7 @@ module.exports.approveUser = async (req, res, next) => {
     await pendingUserModel.findByIdAndDelete(userId);
 
     res.status(200).json({
+      success:true,
       message: "User approved successfully.",
     });
   } catch (err) {
