@@ -17,7 +17,6 @@ module.exports.adminLogin = async (req, res, next) => {
         message: "Please fill all required fields",
       });
     }
-console.log("typed email", email);
 
     if (email !== adminEmail) {
       return res.status(401).json({
@@ -88,8 +87,6 @@ module.exports.adminLogout = async (req, res, next) => {
 module.exports.verifyAdmin = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
-    console.log(token);
-    console.log(token, " sasa ");
 
     if (!token) {
       return res.status(401).json({
@@ -129,7 +126,6 @@ module.exports.getPendingUsers = async (req, res, next) => {
 module.exports.approveUser = async (req, res, next) => {
   try {
     const { userId, role } = req.body;
-    console.log(userId, role);
     const currUser = await pendingUserModel.findById(userId);
     if (!currUser) {
       return res.status(404).json({

@@ -218,7 +218,7 @@ module.exports.logout = async (req, res, next) => {
       return res.status(401).json({
         message: "No token provided",
       });
-    }
+  }
 
     const isTokenBlacklisted = await BlacklistModel.findOne({ token });
 
@@ -239,12 +239,9 @@ module.exports.logout = async (req, res, next) => {
 };
 
 
-
-
 module.exports.dashboard = async (req, res, next) => {
   try {
     const id = req.params.id;
-    // Fetch the user from the database
     const user = await userModel.findById(id).select("-password"); // Exclude the password field
 
     // Check if the user exists
