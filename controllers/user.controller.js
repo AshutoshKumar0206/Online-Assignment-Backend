@@ -191,7 +191,7 @@ module.exports.verifyotp = async (req, res) => {
       lastName: currUser.lastName,
       email: currUser.email,
       password: currUser.password,
-      role: role || "student", // Default to "student" if role is not provided
+      role: role || "student", // Default to "student" if role is not provided    
     });
 
     await approvedUser.save();

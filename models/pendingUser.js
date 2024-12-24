@@ -20,7 +20,7 @@ const pendingUserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["student", "teacher"],
+    enum: ['student', 'teacher'],
     default: "student",
   },
   createdAt: {
