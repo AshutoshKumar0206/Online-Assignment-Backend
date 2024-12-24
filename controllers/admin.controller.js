@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
-// Hardcoded Admin Credentials
 const adminEmail = process.env.ADMIN_EMAIL; 
 const adminPassword = process.env.ADMIN_PASSWORD; // Store hashed password in .env file
 const pendingUserModel = require("../models/pendingUser");
