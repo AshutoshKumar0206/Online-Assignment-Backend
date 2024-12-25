@@ -3,13 +3,13 @@ const jwt = require("jsonwebtoken");
 const blacklistModel = require("../models/blacklist.model");
 // Configuring dotenv to load environment variables from .env file
 require('dotenv').config();
-exports.isAuthenticated = async (req, res, next) => {
+module.exports.isAuthenticated = async (req, res, next) => {
     try {
-        const token =
-			req.cookies.token ||
-			req.body.token ||
-			req.header("Authorization").replace("Bearer ", "");
-
+		// const token = req.cookies.token ||
+		// req.body.token ||
+		const token = req.headers.authorization.split(" ")[1] || req.cookies.token || req.body.token;
+		            //   req.header("Authorization").replace("Bearer", "");
+			console.log(token);
 		// If JWT is missing, return 401 Unauthorized response
 		if (!token) {
 			return res.status(401).json({ success: false, message: `Token Missing` });
@@ -23,13 +23,11 @@ exports.isAuthenticated = async (req, res, next) => {
 			// Storing the decoded JWT payload in the request object for further use
 			req.user = decode;
 		} catch (error) {
-
+			
 			// If JWT verification fails, return 401 Unauthorized response
-			return res
-				.status(401)
-				.json({ success: false, message: "token is invalid" });
+			return res.status(401).json({ success: false, message: "token is invalid" });
 		}
-
+		
 		// If JWT is valid, move on to the next middleware or request handler
 		next();
 
@@ -53,17 +51,17 @@ exports.isAuthenticated = async (req, res, next) => {
 
         req.user = user;
         next();
-    } catch (error) {
-
+    } catch (err) {
 		// If there is an error during the authentication process
+		console.error(err);
 		return res.status(401).json({
 			success: false,
-			message: `Something Went Wrong While Validating the Token`,
+			message: "Something Went Wrong While Validating the Token",
 		});
 	}
 }
 
-exports.isStudent = async (req, res, next) => {
+module.exports.isStudent = async (req, res, next) => {
 	try {
 		const userDetails = await User.findOne({ email: req.user.email });
 
@@ -81,7 +79,7 @@ exports.isStudent = async (req, res, next) => {
 	}
 };
 
-exports.isInstructor = async (req, res, next) => {
+module.exports.isInstructor = async (req, res, next) => {
 	try {
 		const userDetails = await User.findOne({ email: req.user.email });
 		console.log(userDetails);
