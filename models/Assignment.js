@@ -25,6 +25,14 @@ const AssignmentSchema = new mongoose.Schema({
       type: Date,
       default: Date.now,
     },
+    minVal: {
+      type: Number,
+      default:0
+    },
+    maxVal: {
+      type: Number,
+      required: true,
+    }
   });
   
   module.exports = mongoose.model('Assignment', AssignmentSchema);
