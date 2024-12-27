@@ -17,9 +17,10 @@ const AssignmentSchema = new mongoose.Schema({
       ref: 'User',
       required: true,
     },
-    courseId: {
+    subjectId: {
       type: String,
       required: true,
+      ref: 'Subject',
     },
     createdAt: {
       type: Date,

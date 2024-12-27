@@ -26,8 +26,13 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['student', 'teacher', 'Admin'],
-    default:'student',
+    enum: ['student', 'teacher'],
+    default: 'student',
+  },
+  subjects: {
+    type: [String], // Array of subject IDs the user is associated with
+    ref: 'Subject', // References the Subject model
+    default: [],
   },
   createdAt: {
     type: Date,
