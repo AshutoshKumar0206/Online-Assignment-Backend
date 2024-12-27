@@ -5,10 +5,7 @@ const blacklistModel = require("../models/blacklist.model");
 require('dotenv').config();
 module.exports.isAuthenticated = async (req, res, next) => {
     try {
-		// const token = req.cookies.token ||
-		// req.body.token ||
 		const token = req.headers.authorization.split(" ")[1] || req.cookies.token || req.body.token;
-		            //   req.header("Authorization").replace("Bearer", "");
 			console.log(token);
 		// If JWT is missing, return 401 Unauthorized response
 		if (!token) {
