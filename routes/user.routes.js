@@ -12,6 +12,10 @@ router.post("/logout", userController.logout);
 router.post("/sendotp", userController.sendotp);
 router.post("/verifyotp", userController.verifyotp);
 
+//Reset Password Routes
+router.post("/sendresetotp", userController.sendresetpasswordotp);
+router.post("/resetpassword", userController.resetPassword);
+
 // User Dashboard Route
 router.get("/dashboard/:id", isAuthenticated, userController.dashboard);
 
