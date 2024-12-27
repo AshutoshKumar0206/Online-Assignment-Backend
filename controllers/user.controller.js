@@ -9,6 +9,7 @@ const OTP = require("../models/Otp");
 const emailTemplate = require("../mail/emailVerificationTemplate");
 const mailSender = require("../utils/mailSender");
 const passwordUpdated = require("../mail/PasswordUpdate");
+const Subject = require('../models/Subject');
 
 module.exports.signup = async (req, res, next) => {
   try {
@@ -338,11 +339,16 @@ exports.resetPassword = async (req, res) => {
 module.exports.dashboard = async (req, res, next) => {
   try {
     const id = req.params.id;
-    // Fetch the user from the database
-    const user = await userModel.findById(id).select("-password"); // Exclude the password field
-    console.log(user);
-    console.log(id);
-    // Check if the user exists
+
+    const user = await userModel
+      .findById(id)
+      .select("-password") // Exclude the password field
+      .populate({
+        path: "subjects",
+        select: "name teacher subjectId", // Fetch specific fields from subjects
+      })
+      .exec();
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -350,16 +356,30 @@ module.exports.dashboard = async (req, res, next) => {
       });
     }
 
-    // Return the user data
+    const subjectDetails = user.subjects.map(subject => ({
+      subjectId: subject._id,
+      subjectName: subject.name,
+      teacherName: subject.teacherName, // Assuming teacherName is a field in the Subject model
+    }));
+
     res.status(200).json({
       success: true,
-      user,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+        subjects: subjectDetails,
+      },
     });
   } catch (err) {
     console.error("Error fetching user dashboard:", err);
     next(err);
   }
 };
+
 
 // Controller for Changing Password
 // exports.changePassword = async (req, res) => {
