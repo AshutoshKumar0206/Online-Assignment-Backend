@@ -339,7 +339,7 @@ exports.resetPassword = async (req, res) => {
 
 module.exports.dashboard = async (req, res, next) => {
   try {
-    const id = req.params.id;
+    const { id } = req.params;
 
     const user = await userModel
       .findById(id)
@@ -347,8 +347,7 @@ module.exports.dashboard = async (req, res, next) => {
       .populate({
         path: "subjects",
         select: "name teacher subjectId", // Fetch specific fields from subjects
-      })
-      .exec();
+      }).exec();
 
     if (!user) {
       return res.status(404).json({
@@ -364,11 +363,9 @@ module.exports.dashboard = async (req, res, next) => {
     }));
 
     // Ensure only one response is sent
-    if (!res.headersSent) {
       return res.status(200).json({
-        success: true,
         user: {
-          id: user._id,
+          id: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
@@ -376,19 +373,17 @@ module.exports.dashboard = async (req, res, next) => {
           createdAt: user.createdAt,
           subjects: subjectDetails,
         },
+        success: true,
       });
-    }
   } catch (err) {
     console.error("Error fetching user dashboard:", err);
     
-    // If res.headersSent is false, send the error response directly
-    if (!res.headersSent) {
+    // if(!res.headersSent){
       return res.status(500).json({
         success: false,
         message: "Internal Server Error",
       });
-    }
-
+    // }
     // Otherwise, pass to error-handling middleware
     next(err);
   }
