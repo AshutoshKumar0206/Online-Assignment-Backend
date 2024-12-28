@@ -19,4 +19,7 @@ router.post("/resetpassword", userController.resetPassword);
 // User Dashboard Route
 router.get("/dashboard/:id", isAuthenticated, userController.dashboard);
 
+//Subject Routes
+router.post("/addsubject", isAuthenticated, userController.addSubject);
+
 module.exports = router;
