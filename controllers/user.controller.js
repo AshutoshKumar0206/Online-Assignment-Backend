@@ -7,6 +7,7 @@ const BlacklistModel = require("../models/blacklist.model");
 const otpGenerator = require("otp-generator");
 const OTP = require("../models/Otp");
 const emailTemplate = require("../mail/emailVerificationTemplate");
+const resetTemplate = require("../mail/resetPassOtp")
 const mailSender = require("../utils/mailSender");
 const passwordUpdated = require("../mail/PasswordUpdate");
 const Subject = require('../models/Subject');
@@ -215,7 +216,7 @@ module.exports.logout = async (req, res, next) => {
         success: false,
         message: "No token provided",
       });
-    }
+  }
 
     const isTokenBlacklisted = await BlacklistModel.findOne({ token });
 
@@ -267,7 +268,7 @@ module.exports.sendresetpasswordotp = async (req, res) => {
     const mailResponse = await mailSender(
       email,
       "Verification email",
-      emailTemplate(otp)
+      resetTemplate(otp)
     )
     console.log("mail response:", mailResponse);
 
