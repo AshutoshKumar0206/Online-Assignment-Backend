@@ -408,17 +408,12 @@ if(!subject){
 }
 
 //(This is left to be done) => to save the teacher id in some array
-
- res.status(200).json({ 
+let user = await userModel.findByIdAndUpdate(id, { $push: { subjects: id } }, { new: true });//
+ 
+res.status(200).json({ 
   success: true,
   message: 'Subject created successfully.',
  });
-}
-
-//Controller for getting respective subjects created by teacher
-module.exports.getSubjectsCreated = async (req, res, next) => {
-const { id } = req.params.id;
-
 }
 
 // Controller for Changing Password
