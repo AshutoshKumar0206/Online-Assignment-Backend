@@ -381,6 +381,44 @@ module.exports.dashboard = async (req, res, next) => {
   }
 };
 
+//Controller for creating subjects
+module.exports.createSubject = async (req, res, next) => {
+const { subjectName } = req.body;
+const { id } = req.params;//user Id
+console.log(id);
+
+let verifyRole = await userModel.findById(id);
+console.log(verifyRole);
+
+if(verifyRole.role !== 'teacher'){//check if user is a teacher
+  res.status(403).json({ 
+    success: false,
+    message: 'You are not authorized to create subjects.' 
+  });
+}
+
+let subject = await Subject.findOne({teacher_id: id});
+let subjectId = subject.subject_id;
+if(!subject){
+  subject = new Subject({ 
+    subject_name: subjectName,
+    teacher_id: id,
+  });
+  await subject.save();
+}
+
+//(This is left to be done) => to save the teacher id in some array
+
+ res.status(200).json({ 
+  success: true,
+  message: 'Subject created successfully.',
+ });
+}
+
+//Controller for getting respective subjects created by teacher
+module.exports.getSubjectsCreated = async (req, res, next) => {
+
+}
 
 // Controller for Changing Password
 // exports.changePassword = async (req, res) => {
