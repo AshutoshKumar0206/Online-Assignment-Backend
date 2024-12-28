@@ -384,11 +384,11 @@ module.exports.dashboard = async (req, res, next) => {
 //Controller for creating subjects
 module.exports.createSubject = async (req, res, next) => {
 const { subjectName } = req.body;
-const { id } = req.params;//user Id
-console.log(id);
+const { id } = req.params.id;//user Id
+console.log("Teacher Id", id);
 
 let verifyRole = await userModel.findById(id);
-console.log(verifyRole);
+console.log("Role", verifyRole);
 
 if(verifyRole.role !== 'teacher'){//check if user is a teacher
   res.status(403).json({ 
@@ -417,6 +417,7 @@ if(!subject){
 
 //Controller for getting respective subjects created by teacher
 module.exports.getSubjectsCreated = async (req, res, next) => {
+const { id } = req.params.id;
 
 }
 
