@@ -216,7 +216,7 @@ module.exports.logout = async (req, res, next) => {
         success: false,
         message: "No token provided",
       });
-    }
+  }
 
     const isTokenBlacklisted = await BlacklistModel.findOne({ token });
 
