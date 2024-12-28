@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/user.controller");
+const subjectController = require("../controllers/subject.controller");
 const { isAuthenticated } = require("../middlewares/auth.middleware"); // Move middleware to a separate file for modularity
 
 // User Authentication Routes
@@ -20,6 +21,6 @@ router.post("/resetpassword", userController.resetPassword);
 router.get("/dashboard/:id", isAuthenticated, userController.dashboard);
 
 //Subject Routes
-router.post("/addsubject", isAuthenticated, userController.addSubject);
+router.post("/addsubject/:id", isAuthenticated, subjectController.createSubject);
 
 module.exports = router;

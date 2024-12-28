@@ -363,58 +363,38 @@ module.exports.dashboard = async (req, res, next) => {
       teacherName: subject.teacherName, // Assuming teacherName is a field in the Subject model
     }));
 
-    res.status(200).json({
-      success: true,
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-        createdAt: user.createdAt,
-        subjects: subjectDetails,
-      },
-    });
+    // Ensure only one response is sent
+    if (!res.headersSent) {
+      return res.status(200).json({
+        success: true,
+        user: {
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+          createdAt: user.createdAt,
+          subjects: subjectDetails,
+        },
+      });
+    }
   } catch (err) {
     console.error("Error fetching user dashboard:", err);
+    
+    // If res.headersSent is false, send the error response directly
+    if (!res.headersSent) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+      });
+    }
+
+    // Otherwise, pass to error-handling middleware
     next(err);
   }
 };
 
-//Controller for creating subjects
-module.exports.createSubject = async (req, res, next) => {
-const { subjectName } = req.body;
-const { id } = req.params.id;//user Id
-console.log("Teacher Id", id);
 
-let verifyRole = await userModel.findById(id);
-console.log("Role", verifyRole);
-
-if(verifyRole.role !== 'teacher'){//check if user is a teacher
-  res.status(403).json({ 
-    success: false,
-    message: 'You are not authorized to create subjects.' 
-  });
-}
-
-let subject = await Subject.findOne({teacher_id: id});
-let subjectId = subject.subject_id;
-if(!subject){
-  subject = new Subject({ 
-    subject_name: subjectName,
-    teacher_id: id,
-  });
-  await subject.save();
-}
-
-//(This is left to be done) => to save the teacher id in some array
-let user = await userModel.findByIdAndUpdate(id, { $push: { subjects: id } }, { new: true });//
- 
-res.status(200).json({ 
-  success: true,
-  message: 'Subject created successfully.',
- });
-}
 
 // Controller for Changing Password
 // exports.changePassword = async (req, res) => {
