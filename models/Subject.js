@@ -1,14 +1,13 @@
 const mongoose = require('mongoose');
 
 const SubjectSchema = new mongoose.Schema({
-  subject_id: {
-    type: String,
-    required: true,
-    unique: true
-  },
   subject_name: {
     type: String,
     required: true
+  },
+  subject_id: {
+    type: String,
+    required: true,
   },
   teacher_id: {
     type: String,
