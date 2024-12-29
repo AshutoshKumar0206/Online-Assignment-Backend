@@ -1,16 +1,20 @@
 const mongoose = require('mongoose');
 
 const SubjectSchema = new mongoose.Schema({
+  subject_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
   subject_name: {
     type: String,
     required: true
   },
-  subject_id: {
+  teacher_name: {
     type: String,
     required: true,
   },
   teacher_id: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User' // References the User model (Teacher)
   },

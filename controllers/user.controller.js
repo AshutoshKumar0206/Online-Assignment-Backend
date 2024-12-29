@@ -339,14 +339,13 @@ exports.resetPassword = async (req, res) => {
 
 module.exports.dashboard = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const id  = req.params.id;
 
-    const user = await userModel
-      .findById(id)
+    const user = await userModel.findOne({_id: id},)
       .select("-password") // Exclude the password field
       .populate({
-        path: "subjects",
-        select: "name teacher subjectId", // Fetch specific fields from subjects
+          path: "subjects",
+          select: "subject_name teacher_name subject_id", // Fetch specific fields from subjects
       }).exec();
 
     if (!user) {
@@ -355,36 +354,39 @@ module.exports.dashboard = async (req, res, next) => {
         message: "User not found",
       });
     }
+    const subject = await userModel.findById(id);
+    // console.log('hello', subject);
+    const teacher_id = subject.id;
+    console.log('teacherid:', teacher_id);
+    const teacherName = await userModel.findById(teacher_id).select("firstName lastName").exec();
+    const subjectDetails = await Promise.all(
+      user.subjects.map(async (sub) => {
+        const subjectData = await Subject.findById(sub.subject_id).select("subject_name").exec();
+        const teacherName = await userModel.findById(sub.teacher).select("firstName lastName").exec();
 
-    const subjectDetails = user.subjects.map(subject => ({
-      subjectId: subject._id,
-      subjectName: subject.name,
-      teacherName: subject.teacherName, // Assuming teacherName is a field in the Subject model
-    }));
-
+        return {
+          subjectName: subjectData.subject_name,
+          teacherName: teacherName.firstName + " " + teacherName.lastName,
+          subject_id: sub.subject_id,
+        };
+      })
+    );
     // Ensure only one response is sent
       return res.status(200).json({
+        success: true,
+        message: "User dashboard fetched successfully",
         user: {
-          id: user.id,
-          firstName: user.firstName,
+          id: id,
+          firstName: user.firstName,  
           lastName: user.lastName,
           email: user.email,
           role: user.role,
-          createdAt: user.createdAt,
           subjects: subjectDetails,
+          createdAt: user.createdAt,
         },
-        success: true,
       });
   } catch (err) {
     console.error("Error fetching user dashboard:", err);
-    
-    // if(!res.headersSent){
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-      });
-    // }
-    // Otherwise, pass to error-handling middleware
     next(err);
   }
 };
