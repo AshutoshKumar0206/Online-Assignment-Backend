@@ -9,6 +9,10 @@ const SubjectSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  teacher_name: {
+    type: String,
+    required: true,
+  },
   teacher_id: {
     type: String,
     required: true,

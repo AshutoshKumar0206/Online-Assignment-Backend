@@ -23,6 +23,7 @@ module.exports.createSubject = async (req, res) => {
       subject_name: subject_name,
       teacher_id: id,
       subject_id: Math.random().toString(36).substr(2, 9),
+      teacher_name: user.firstName + " " + user.lastName,
     });
      console.log('New Subject', newSubject);
     const savedSubject = await newSubject.save();
@@ -39,12 +40,10 @@ module.exports.createSubject = async (req, res) => {
     });
   } catch (err) {
     console.error('Error creating subject:', err);
-    if(!res.headersSent){
     return res.status(500).json({
       error: err.message,
       success: false,
       message: "Internal Server Error",
     });
-  }
   }
 };
