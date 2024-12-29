@@ -18,7 +18,7 @@ router.post("/sendresetotp", userController.sendresetpasswordotp);
 router.post("/resetpassword", userController.resetPassword);
 
 // User Dashboard Route
-router.get("/dashboard/:id", isAuthenticated, userController.dashboard);
+router.get("/dashboard/:id", isAuthenticated,userController.dashboard);
 
 //Subject Routes
 router.post("/addsubject/:id", isAuthenticated, subjectController.createSubject);

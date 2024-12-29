@@ -39,12 +39,10 @@ module.exports.createSubject = async (req, res) => {
     });
   } catch (err) {
     console.error('Error creating subject:', err);
-    if(!res.headersSent){
     return res.status(500).json({
       error: err.message,
       success: false,
       message: "Internal Server Error",
     });
-  }
   }
 };

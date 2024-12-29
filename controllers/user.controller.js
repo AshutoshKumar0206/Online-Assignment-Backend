@@ -340,15 +340,20 @@ exports.resetPassword = async (req, res) => {
 module.exports.dashboard = async (req, res, next) => {
   try {
     const { id } = req.params;
-
+    console.log("ID GOT ");
+    console.log(id);
+    
     const user = await userModel
-      .findById(id)
-      .select("-password") // Exclude the password field
-      .populate({
-        path: "subjects",
-        select: "name teacher subjectId", // Fetch specific fields from subjects
-      }).exec();
-
+    .findById(id)
+    .select("-password") // Exclude the password field
+    .populate({
+      path: "subjects",
+      select: "subject_name teacher_id subject_id", // Fetch specific fields from subjects
+    })
+    .exec();
+    
+    console.log("USER GOT ");
+    console.log(id);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -356,38 +361,46 @@ module.exports.dashboard = async (req, res, next) => {
       });
     }
 
+    console.log(" IN DASHBOARD ");
+    console.log(user);
+
     const subjectDetails = user.subjects.map(subject => ({
-      subjectId: subject._id,
-      subjectName: subject.name,
-      teacherName: subject.teacherName, // Assuming teacherName is a field in the Subject model
+      subjectId: subject.subject_id,
+      subjectName: subject.subject_name,
+      teacherName: subject.teacher_id, // Assuming teacher_id is sufficient for now
     }));
 
-    // Ensure only one response is sent
-      return res.status(200).json({
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          role: user.role,
-          createdAt: user.createdAt,
-          subjects: subjectDetails,
-        },
-        success: true,
-      });
+    console.log("SUB DEETS");
+    console.log(subjectDetails);
+
+    res.status(200).json({
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+        subjectDetails, // Include the mapped subject details
+      },
+      success: true,
+    });
   } catch (err) {
     console.error("Error fetching user dashboard:", err);
-    
-    // if(!res.headersSent){
-      return res.status(500).json({
+
+    // Prevent sending another response if headers were already sent
+    if (!res.headersSent) {
+      res.status(500).json({
         success: false,
         message: "Internal Server Error",
       });
-    // }
-    // Otherwise, pass to error-handling middleware
-    next(err);
+    }
+
+    // Optionally pass the error to the next middleware
+    // next(err);
   }
 };
+
 
 
 
