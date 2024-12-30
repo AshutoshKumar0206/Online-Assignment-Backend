@@ -55,8 +55,8 @@ module.exports.getSubject = async (req, res, next) => {
     const { id } = req.params;
     try{
     console.log('id:', id);
-     const subject = await Subject.findOne({subject_id : id});
-     console.log('Subject:', subject);                                     
+    const subject = await Subject.findOne({subject_id : id});
+    console.log('Subject:', subject);                                     
       
     if(!subject){
       res.status(404).json({ 
