@@ -99,33 +99,38 @@ module.exports.getSubject = async (req, res, next) => {
 //Controller for including students
 module.exports.addStudent = async (req, res, next) => {
   const { id } = req.params;//fetch subjectId from url
-  const emails = req.body;
+  const emails  = req.body.email;
   console.log('Emails:', emails);
   try{
-     if(!emails){
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Student Emails have to be provided.' 
+    let subjectId = await Subject.findOne({subject_id: id});
+    subjectId = subjectId._id; 
+    if(!emails){
+      let studentsAdded = await Subject.findById(subjectId).populate({ path: 'students_id', select: '-password -subjects',});
+      console.log('Students are there:', studentsAdded.students_id); 
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Existing students returned.' ,
+        notFoundStudents : "",
+        students_id: studentsAdded.students_id
       });
-     }
-
+    }
      let listOfEmails = emails.split(',').map(email => email.trim());
      let notFoundStudents = [];
-
+      
      for(const email of listOfEmails){
-        let student = await userModel.findOne({email: email});
+        let student = await userModel.findOne({email});
         console.log('Student hu bei kya kr lega:', student); 
         if(student){
-          let studentId = await Subject.findByIdAndUpdate(id, {$push: { students_id: student._id } }, { new: true });
+          let studentId = await Subject.findByIdAndUpdate(subjectId, {$push: { students_id: student._id.toString() } }, { new: true });
           console.log('Student Added:', studentId); 
         } else if(!student){
            let notStudent = notFoundStudents.push(email);
            console.log('Not Found Student:', notStudent);
         }
      }
-     
-     let studentsAdded = await Subject.findById(id).populate('students_id');
-  res.status(200).json({ 
+
+    let studentsAdded = await Subject.findById(subjectId).populate({ path: 'students_id', select: '-password -subjects',});
+    res.status(200).json({ 
       success: true,
       message: "Students added successfully.",
       notFoundStudents,
