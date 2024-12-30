@@ -47,3 +47,8 @@ module.exports.createSubject = async (req, res) => {
     });
   }
 };
+
+//Controller for getting all subjects of user
+module.exports.getAllSubjects = async (req, res) => {
+  
+}
