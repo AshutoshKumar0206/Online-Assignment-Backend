@@ -22,5 +22,6 @@ router.get("/dashboard/:id", isAuthenticated,userController.dashboard);
 
 //Subject Routes
 router.post("/addsubject/:id", isAuthenticated, subjectController.createSubject);
+router.get("/getsubject/:id", isAuthenticated, subjectController.getSubject);
 
 module.exports = router;

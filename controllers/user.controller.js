@@ -348,7 +348,7 @@ module.exports.dashboard = async (req, res, next) => {
     .select("-password") // Exclude the password field
     .populate({
       path: "subjects",
-      select: "subject_name teacher_name teacher_id", // Fetch specific fields from subjects
+      select: "subject_name teacher_name teacher_id subject_id", // Fetch specific fields from subjects
     })
     .exec();
     
@@ -367,6 +367,7 @@ module.exports.dashboard = async (req, res, next) => {
     const subjectDetails = user.subjects.map(subject => ({
       subjectName: subject.subject_name,
       teacherName: user.firstName + " " + user.lastName, // Assuming teacher_id is sufficient for now
+      subjectId: subject.subject_id, // Assuming teacher_id is sufficient for now
     }));
 
     console.log("SUB DEETS");
