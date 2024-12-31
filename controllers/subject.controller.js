@@ -54,7 +54,9 @@ module.exports.getSubject = async (req, res, next) => {
     const { id } = req.params;
     try{
     console.log('id:', id);
-     let subject = await Subject.findOne({subject_id : id});
+
+     const subject = await Subject.findOne({subject_id : id});
+
      console.log('Subject:', subject);                                     
       
     if(!subject){
@@ -64,7 +66,8 @@ module.exports.getSubject = async (req, res, next) => {
       });
     } 
     console.log('User hai mai kya kr lega bei:', subject);
-    let teacherId = subject.teacher_id;
+
+    const teacherId = subject.teacher_id;
     console.log(teacherId);
     if(!teacherId){
       return res.status(404).json({
@@ -73,7 +76,11 @@ module.exports.getSubject = async (req, res, next) => {
       });
     }
 
-    let user = await userModel.findById(teacherId).select("-password"); 
+    // const user = await userModel.findById(teacherId).select("firstName lastName").populate({
+    //   path: "subjects",
+    //   select: "subjectName teacherName subjectId",
+    // }); 
+    const user = await userModel.findById(teacherId).select("-password"); 
      console.log('User:', user);
     if(!user){
       return res.status(404).json({ 
@@ -86,6 +93,7 @@ module.exports.getSubject = async (req, res, next) => {
        success: true, 
        message: "Subject fetched successfully.", 
        subject_id: subject.subject_id,
+//        subject_id: subject._id,
        subject_name: user.subject_name,
        teacher_name: user.firstName + " " + user.lastName,
        teacher_id: subject.teacher_id,
@@ -103,6 +111,7 @@ module.exports.addStudent = async (req, res, next) => {
   console.log('Emails:', emails);
   try{
     let subjectId = await Subject.findOne({subject_id: id});
+
     subjectId = subjectId._id; 
     if(!emails){
       let studentsAdded = await Subject.findById(subjectId).populate({ path: 'students_id', select: '-password -subjects',});
@@ -120,7 +129,7 @@ module.exports.addStudent = async (req, res, next) => {
      for(const email of listOfEmails){
         let student = await userModel.findOne({email});
         console.log('Student hu bei kya kr lega:', student); 
-        if(student){
+        if(student && student.role === 'student'){
           let studentId = await Subject.findByIdAndUpdate(subjectId, {$push: { students_id: student._id.toString() } }, { new: true });
           console.log('Student Added:', studentId); 
         } else if(!student){
@@ -139,5 +148,33 @@ module.exports.addStudent = async (req, res, next) => {
 
   } catch(err){
     next(err);
+  }
+}
+
+//Controller for removing students
+module.exports.removeStudent = async (req, res, next) => {
+  const { subjectId } = req.params;
+  const studentId = req.body.studentId;
+  try{
+      // Remove studentId from subject's studentIds array
+      await Subject.findByIdAndUpdate(subjectId, {
+          $pull: { students_id: studentId },
+      });
+
+      // Remove subjectId from student's subjects array
+      await userModel.findByIdAndUpdate(studentId, {
+          $pull: { subjects: subjectId },
+      });
+
+      res.status(200).send({ 
+        success: true, 
+        message: 'Student removed successfully'
+      });
+
+  } catch(err){
+    res.status(500).send({ 
+      success: false, 
+      message: 'Internal Server Error', 
+    });
   }
 }
