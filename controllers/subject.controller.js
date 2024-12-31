@@ -54,7 +54,9 @@ module.exports.getSubject = async (req, res, next) => {
     const { id } = req.params;
     try{
     console.log('id:', id);
-     let subject = await Subject.findOne({subject_id : id});
+
+     const subject = await Subject.findOne({subject_id : id});
+
      console.log('Subject:', subject);                                     
       
     if(!subject){
@@ -64,7 +66,8 @@ module.exports.getSubject = async (req, res, next) => {
       });
     } 
     console.log('User hai mai kya kr lega bei:', subject);
-    let teacherId = subject.teacher_id;
+
+    const teacherId = subject.teacher_id;
     console.log(teacherId);
     if(!teacherId){
       return res.status(404).json({
@@ -73,7 +76,11 @@ module.exports.getSubject = async (req, res, next) => {
       });
     }
 
-    let user = await userModel.findById(teacherId).select("-password"); 
+    // const user = await userModel.findById(teacherId).select("firstName lastName").populate({
+    //   path: "subjects",
+    //   select: "subjectName teacherName subjectId",
+    // }); 
+    const user = await userModel.findById(teacherId).select("-password"); 
      console.log('User:', user);
     if(!user){
       return res.status(404).json({ 
@@ -86,6 +93,7 @@ module.exports.getSubject = async (req, res, next) => {
        success: true, 
        message: "Subject fetched successfully.", 
        subject_id: subject.subject_id,
+//        subject_id: subject._id,
        subject_name: user.subject_name,
        teacher_name: user.firstName + " " + user.lastName,
        teacher_id: subject.teacher_id,
