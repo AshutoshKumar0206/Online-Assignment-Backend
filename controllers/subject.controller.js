@@ -131,6 +131,7 @@ module.exports.addStudent = async (req, res, next) => {
         console.log('Student hu bei kya kr lega:', student); 
         if(student && student.role === 'student'){
           let studentId = await Subject.findByIdAndUpdate(subjectId, {$push: { students_id: student._id.toString() } }, { new: true });
+          let subjects = await userModel.findOneAndUpdate(student._id, { $push: { subjects: subjectId.toString() } }, { new: true });
           console.log('Student Added:', studentId); 
         } else if(!student){
            let notStudent = notFoundStudents.push(email);
