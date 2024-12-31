@@ -168,22 +168,23 @@ module.exports.addStudent = async (req, res, next) => {
         students_id: studentsAdded.students_id
       });
     }
-     let listOfEmails = emails.split(',').map(email => email.trim());
+    let listOfEmails = emails.split(',').map(email => email.trim());
      let notFoundStudents = [];
-      
+     
      for(const email of listOfEmails){
-        let student = await userModel.findOne({email});
-        console.log('Student hu bei kya kr lega:', student); 
-        if(student && student.role === 'student'){
-          let studentId = await Subject.findByIdAndUpdate(subjectId, {$push: { students_id: student._id.toString() } }, { new: true });
-          console.log('Student Added:', studentId); 
-        } else if(!student){
-           let notStudent = notFoundStudents.push(email);
-           console.log('Not Found Student:', notStudent);
+       let student = await userModel.findOne({email});
+       console.log('Student hu bei kya kr lega:', student); 
+       if(student && student.role === 'student'){
+         let studentId = await Subject.findByIdAndUpdate(subjectId, {$push: { students_id: student._id.toString() } }, { new: true });
+         console.log('Student Added:', studentId); 
+        } else{
+          let notStudent = notFoundStudents.push(email);
+          console.log('Not Found Student:', notStudent);
         }
-     }
-
-    let studentsAdded = await Subject.findById(subjectId).populate({ path: 'students_id', select: '-password -subjects',});
+      }
+      
+      let studentsAdded = await Subject.findById(subjectId).populate({ path: 'students_id', select: '-password -subjects',});
+      console.log('Students are there:', studentsAdded.students_id); 
     res.status(200).json({ 
       success: true,
       message: "Students added successfully.",
@@ -198,14 +199,18 @@ module.exports.addStudent = async (req, res, next) => {
 
 //Controller for removing students
 module.exports.removeStudent = async (req, res, next) => {
-  const { subjectId } = req.params;
+  const { id : subjectId  } = req.params;
   const studentId = req.body.studentId;
   try{
       // Remove studentId from subject's studentIds array
-      await Subject.findByIdAndUpdate(subjectId, {
-          $pull: { students_id: studentId },
+      console.log(subjectId, " in remove ", studentId);
+      // let subject = await Subject.findOne({subject_id : subjectId});
+      // console.log('Before update:', subject);
+      await Subject.findOneAndUpdate({subject_id : subjectId}, {
+        $pull: { students_id: studentId },
       });
-
+      // subject = await Subject.findOne({subject_id : subjectId});
+      // console.log('after update:', subject);
       // Remove subjectId from student's subjects array
       await userModel.findByIdAndUpdate(studentId, {
           $pull: { subjects: subjectId },
