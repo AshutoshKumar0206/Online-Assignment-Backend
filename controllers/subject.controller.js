@@ -1,39 +1,72 @@
-const userModel = require('../models/User');
-const Subject = require('../models/Subject');
-const { default: mongoose } = require('mongoose');
+const mongoose = require('mongoose');
+const Subject = require('../models/Subject'); // Ensure this path points to your Subject model
+const userModel = require('../models/User'); // Ensure this path points to your User model
+
+// Helper function to generate a unique subject code
+async function generateUniqueSubjectCode() {
+  let code;
+  let isUnique = false;
+
+  do {
+    code = Array.from({ length: 8 }, () =>
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+        .charAt(Math.floor(Math.random() * 62))
+    ).join('');
+    const existing = await Subject.findOne({ subject_code: code });
+    isUnique = !existing;
+  } while (!isUnique);
+
+  return code;
+}
 
 module.exports.createSubject = async (req, res) => {
   const { id } = req.params;
   const { subject_name } = req.body;
   
   try {
+    // Fetch the user by ID
     const user = await userModel.findById(id);
     console.log('id', id);
     console.log(`subjectName: ${subject_name}`);
     console.log('User', user);
 
+    // Check if the user exists
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
 
+    // Ensure only teachers can create subjects
     if (user.role !== 'teacher') {
       return res.status(403).json({ success: false, message: 'Only teachers can create subjects.' });
     }
 
+    // Generate a unique subject_code
+    const subject_code = await generateUniqueSubjectCode();
+
+    // Create a new Subject object
     const newSubject = new Subject({
       subject_name: subject_name,
       teacher_id: id,
       subject_id: new mongoose.Types.ObjectId(),
-      teacher_name: user.firstName + " " + user.lastName,
+      teacher_name: `${user.firstName} ${user.lastName}`, // Concatenate first and last name
+      subject_code: subject_code, // Add the generated subject_code
     });
-     console.log('New Subject', newSubject);
-    const savedSubject = await newSubject.save();
-    // user.subjects.push(savedSubject._id);
-    console.log("A new ID", savedSubject.id);
-    let userSubjects = await userModel.findByIdAndUpdate(id, { $push: { subjects: savedSubject.id } }, { new: true });
-    console.log('Updated User', userSubjects.id === id ? userSubjects : null );
 
-    // const updatedUser = await user.save();
+    console.log('New Subject', newSubject);
+
+    // Save the new Subject to the database
+    const savedSubject = await newSubject.save();
+    console.log('A new ID', savedSubject.id);
+
+    // Update the teacher's subjects array
+    const userSubjects = await userModel.findByIdAndUpdate(
+      id, 
+      { $push: { subjects: savedSubject.id } }, 
+      { new: true }
+    );
+    console.log('Updated User', userSubjects.id === id ? userSubjects : null);
+
+    // Return the response
     return res.status(201).json({
       user: userSubjects,
       success: true,
@@ -49,60 +82,72 @@ module.exports.createSubject = async (req, res) => {
   }
 };
 
-//Controller for getting all subjects of user
+
+// Controller for getting all subjects of a user
 module.exports.getSubject = async (req, res, next) => {
-    const { id } = req.params;
-    try{
+  const { id } = req.params;
+
+  try {
     console.log('id:', id);
 
-     const subject = await Subject.findOne({subject_id : id});
+    // Find the subject using the `subject_id`
+    const subject = await Subject.findOne({ subject_id: id });
+    console.log('Subject:', subject);
 
-     console.log('Subject:', subject);                                     
-      
-    if(!subject){
-      res.status(404).json({ 
-        success: false, 
-        message: 'Subject not created. Please Create Subject' 
+    // Check if the subject exists
+    if (!subject) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subject not created. Please create the subject.',
       });
-    } 
-    console.log('User hai mai kya kr lega bei:', subject);
+    }
+
+    console.log('Found subject:', subject);
 
     const teacherId = subject.teacher_id;
-    console.log(teacherId);
-    if(!teacherId){
+    console.log('Teacher ID:', teacherId);
+
+    // Check if the teacher ID exists
+    if (!teacherId) {
       return res.status(404).json({
-         success: false, 
-         message: 'User is not registered.' 
+        success: false,
+        message: 'Teacher is not registered.',
       });
     }
 
-    // const user = await userModel.findById(teacherId).select("firstName lastName").populate({
-    //   path: "subjects",
-    //   select: "subjectName teacherName subjectId",
-    // }); 
-    const user = await userModel.findById(teacherId).select("-password"); 
-     console.log('User:', user);
-    if(!user){
-      return res.status(404).json({ 
-        success: false, 
-        message: 'User not found.'  
+    // Fetch teacher details, excluding the password
+    const teacher = await userModel.findById(teacherId).select('-password');
+    console.log('Teacher:', teacher);
+
+    // Check if the teacher exists
+    if (!teacher) {
+      return res.status(404).json({
+        success: false,
+        message: 'Teacher not found.',
       });
     }
 
-    return res.status(200).json({ 
-       success: true, 
-       message: "Subject fetched successfully.", 
-       subject_id: subject.subject_id,
-//        subject_id: subject._id,
-       subject_name: user.subject_name,
-       teacher_name: user.firstName + " " + user.lastName,
-       teacher_id: subject.teacher_id,
-         
-      });
-   } catch(err){
-      next(err);
-   }
-}
+    // Log statements for debugging (preserving original logging)
+    console.log('User hai mai kya kr lega bei:', subject);
+    console.log('Updated User details fetched:', teacher.firstName, teacher.lastName);
+
+    // Construct and return the response
+    return res.status(200).json({
+      success: true,
+      message: 'Subject fetched successfully.',
+      subject_id: subject.subject_id,
+      subject_code: subject.subject_code, // Include the subject_code
+      subject_name: subject.subject_name, // Correctly fetch from `subject`
+      teacher_name: `${teacher.firstName} ${teacher.lastName}`, // Full teacher name
+      teacher_id: subject.teacher_id,
+      students: subject.students_id, // Include associated students if applicable
+      assignments: subject.assignments_id, // Include associated assignments if applicable
+    });
+  } catch (err) {
+    console.error('Error fetching subject:', err);
+    next(err);
+  }
+};
 
 //Controller for including students
 module.exports.addStudent = async (req, res, next) => {
@@ -111,6 +156,7 @@ module.exports.addStudent = async (req, res, next) => {
   console.log('Emails:', emails);
   try{
     let subjectId = await Subject.findOne({subject_id: id});
+
     subjectId = subjectId._id; 
     if(!emails){
       let studentsAdded = await Subject.findById(subjectId).populate({ path: 'students_id', select: '-password -subjects',});
@@ -128,7 +174,7 @@ module.exports.addStudent = async (req, res, next) => {
      for(const email of listOfEmails){
         let student = await userModel.findOne({email});
         console.log('Student hu bei kya kr lega:', student); 
-        if(student){
+        if(student && student.role === 'student'){
           let studentId = await Subject.findByIdAndUpdate(subjectId, {$push: { students_id: student._id.toString() } }, { new: true });
           console.log('Student Added:', studentId); 
         } else if(!student){
@@ -147,5 +193,33 @@ module.exports.addStudent = async (req, res, next) => {
 
   } catch(err){
     next(err);
+  }
+}
+
+//Controller for removing students
+module.exports.removeStudent = async (req, res, next) => {
+  const { subjectId } = req.params;
+  const studentId = req.body.studentId;
+  try{
+      // Remove studentId from subject's studentIds array
+      await Subject.findByIdAndUpdate(subjectId, {
+          $pull: { students_id: studentId },
+      });
+
+      // Remove subjectId from student's subjects array
+      await userModel.findByIdAndUpdate(studentId, {
+          $pull: { subjects: subjectId },
+      });
+
+      res.status(200).send({ 
+        success: true, 
+        message: 'Student removed successfully'
+      });
+
+  } catch(err){
+    res.status(500).send({ 
+      success: false, 
+      message: 'Internal Server Error', 
+    });
   }
 }
