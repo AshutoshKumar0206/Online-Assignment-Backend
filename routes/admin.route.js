@@ -6,7 +6,9 @@ const {
   verifyAdmin, 
   getPendingUsers, 
   approveUser,
-  deletePendingUser 
+  deletePendingUser,
+  getUser,
+  deleteUser
 } = require("../controllers/admin.controller");
 
 // Admin Login and Logout Routes
@@ -25,5 +27,11 @@ router.post("/approve", verifyAdmin, approveUser);
 
 //Route to delete pending users
 router.delete("/deletependinguser/:id", verifyAdmin, deletePendingUser);
+
+//Route to get all the existing users
+router.get("/user", verifyAdmin, getUser);
+
+//Route to delete a particular user (only accessible to verified admins)
+router.delete('/user/:id', verifyAdmin, deleteUser);
 
 module.exports = router;
