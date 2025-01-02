@@ -172,6 +172,12 @@ module.exports.addStudent = async (req, res, next) => {
      let notFoundStudents = [];
      
      for(const email of listOfEmails){
+      // Check if the email is empty
+      if (!email) {
+        console.log('Skipped empty email');
+        continue; // Skip further processing for this email
+      }
+      
        let student = await userModel.findOne({email});
        console.log('Student hu bei kya kr lega:', student); 
        if(student && student.role === 'student'){
