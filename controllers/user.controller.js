@@ -366,8 +366,8 @@ module.exports.dashboard = async (req, res, next) => {
 
     const subjectDetails = user.subjects.map(subject => ({
       subjectName: subject.subject_name,
-      teacherName: user.firstName + " " + user.lastName, // Assuming teacher_id is sufficient for now
-      subjectId: subject.subject_id, // Assuming teacher_id is sufficient for now
+      teacherName: subject.teacher_name,
+      subjectId: subject.subject_id,
     }));
 
     console.log("SUB DEETS");
