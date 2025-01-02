@@ -186,7 +186,7 @@ module.exports.getUser = async (req, res, next) => {
     // Transform the data to include full name
     const formattedUsers = users.map(user => ({
       _id: user._id,
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName + " " + user.lastName,
       email: user.email,
       role: user.role,
     }));
@@ -204,7 +204,7 @@ module.exports.deleteUser = async (req, res, next) => {
     const userId = req.params.id;
 
     // Find and delete the user by ID
-    const deletedUser = await User.findByIdAndDelete(userId);
+    const deletedUser = await userModel.findByIdAndDelete(userId);
 
     if (!deletedUser) {
       return res.status(404).json({ success: false, message: "User not found" });
