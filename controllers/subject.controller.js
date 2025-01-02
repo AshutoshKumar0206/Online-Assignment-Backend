@@ -200,20 +200,24 @@ module.exports.addStudent = async (req, res, next) => {
 
 //Controller for removing students
 module.exports.removeStudent = async (req, res, next) => {
-  const { id : subjectId  } = req.params;
+  const subjectId = req.params.id;
   const studentId = req.body.studentId;
+  const email = req.body.studentEmail;
+  console.log('Student ID:', studentId);
+  console.log('Subject ID:', subjectId);
+  console.log('Email:', email);
   try{
-      // Remove studentId from subject's studentIds array
-      console.log(subjectId, " in remove ", studentId);
-      // let subject = await Subject.findOne({subject_id : subjectId});
-      // console.log('Before update:', subject);
-      await Subject.findOneAndUpdate({subject_id : subjectId}, {
-        $pull: { students_id: studentId },
-      });
+    // Remove studentId from subject's studentIds array
+    console.log(subjectId, " in remove ", studentId);
+    // let subject = await Subject.findOne({subject_id : subjectId});
+    // console.log('Before update:', subject);
+    await Subject.findOneAndUpdate({subject_id : subjectId}, {
+      $pull: { students_id: studentId },
+    });
       // subject = await Subject.findOne({subject_id : subjectId});
       // console.log('after update:', subject);
       // Remove subjectId from student's subjects array
-      await userModel.findByIdAndUpdate(studentId, {
+      await userModel.findOneAndUpdate({email : email}, {
           $pull: { subjects: subjectId },
       });
 
@@ -223,6 +227,7 @@ module.exports.removeStudent = async (req, res, next) => {
       });
 
   } catch(err){
+    console.log(err);
     res.status(500).send({ 
       success: false, 
       message: 'Internal Server Error', 
