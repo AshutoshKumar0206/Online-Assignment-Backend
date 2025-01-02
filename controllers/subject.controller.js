@@ -248,3 +248,62 @@ module.exports.removeStudent = async (req, res, next) => {
     });
   }
 }
+
+
+module.exports.joinSubject = async (req, res, next) => {
+  const { id } = req.params; // Student ID from the URL
+  const { subject_code } = req.body; // Subject code from the request body
+
+  try {
+    // Validate the input
+    if (!subject_code) {
+      return res.status(400).json({
+        success: false,
+        message: 'Subject code is required.',
+      });
+    }
+
+    // Find the subject by subject_code
+    const subject = await Subject.findOne({ subject_code });
+
+    if (!subject) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subject not found. Please check the subject code.',
+      });
+    }
+
+    // Check if the student is already enrolled in the subject
+    if (subject.students_id.includes(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'You are already enrolled in this subject.',
+      });
+    }
+
+    // Add the student to the subject's students_id array
+    await Subject.findByIdAndUpdate(
+      subject._id,
+      { $addToSet: { students_id: id } },
+      { new: true }
+    );
+
+    // Add the subject to the student's subjects array
+    await userModel.findByIdAndUpdate(
+      id,
+      { $addToSet: { subjects: subject._id.toString() } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Successfully joined the subject.',
+      subject: {
+        subject_name: subject.subject_name,
+        teacher_name: subject.teacher_name,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
