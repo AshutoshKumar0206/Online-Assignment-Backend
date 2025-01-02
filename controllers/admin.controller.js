@@ -175,4 +175,47 @@ module.exports.deletePendingUser = async(req, res, next) => {
       message: "Error in Deleting User"
     });
   }
-}
+};
+
+
+module.exports.getUser = async (req, res, next) => {
+  try {
+    // Fetch all users and project only the required fields
+    const users = await userModel.find({}, 'firstName lastName email role _id');
+
+    // Transform the data to include full name
+    const formattedUsers = users.map(user => ({
+      _id: user._id,
+      name: user.firstName + " " + user.lastName,
+      email: user.email,
+      role: user.role,
+    }));
+
+    res.status(200).json({ success: true, users: formattedUsers });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error in Fetching Users detail" });
+  }
+};
+
+
+module.exports.deleteUser = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+
+    // Find and delete the user by ID
+    const deletedUser = await userModel.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error in deleting user" });
+  }
+};
