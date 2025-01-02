@@ -175,8 +175,12 @@ module.exports.addStudent = async (req, res, next) => {
        let student = await userModel.findOne({email});
        console.log('Student hu bei kya kr lega:', student); 
        if(student && student.role === 'student'){
-         let studentId = await Subject.findByIdAndUpdate(subjectId, {$push: { students_id: student._id.toString() } }, { new: true });
-         let subjects = await userModel.findByIdAndUpdate(student._id, { $push: { subjects: subjectId.toString() } }, { new: true });
+        let studentId = await Subject.findByIdAndUpdate(
+          subjectId, { $addToSet: { students_id: student._id.toString() } },{ new: true }
+        );
+        let subjects = await userModel.findByIdAndUpdate(
+          student._id, { $addToSet: { subjects: subjectId.toString() } },{ new: true }
+        );
          console.log('Student Added:', studentId); 
         } else{
           let notStudent = notFoundStudents.push(email);
