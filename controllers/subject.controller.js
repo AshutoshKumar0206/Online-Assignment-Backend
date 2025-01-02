@@ -200,8 +200,8 @@ module.exports.addStudent = async (req, res, next) => {
 
 //Controller for removing students
 module.exports.removeStudent = async (req, res, next) => {
-  const subjectId = req.params.id;
-  const studentId = req.body.studentId;
+  let subjectId = req.params.id;
+  let studentId = req.body.studentId;
   const email = req.body.studentEmail;
   console.log('Student ID:', studentId);
   console.log('Subject ID:', subjectId);
@@ -211,15 +211,19 @@ module.exports.removeStudent = async (req, res, next) => {
     console.log(subjectId, " in remove ", studentId);
     // let subject = await Subject.findOne({subject_id : subjectId});
     // console.log('Before update:', subject);
+    let subject = await Subject.findOne({subject_id : subjectId});
+    
     await Subject.findOneAndUpdate({subject_id : subjectId}, {
       $pull: { students_id: studentId },
     });
+    subjectId = subject._id;
       // subject = await Subject.findOne({subject_id : subjectId});
       // console.log('after update:', subject);
       // Remove subjectId from student's subjects array
       await userModel.findOneAndUpdate({email : email}, {
-          $pull: { subjects: subjectId },
+          $pull: { subjects: subjectId.toString() },
       });
+      console.log('Student:', subject); 
 
       res.status(200).send({ 
         success: true, 
