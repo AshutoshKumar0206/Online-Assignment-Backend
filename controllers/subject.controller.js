@@ -309,33 +309,3 @@ module.exports.joinSubject = async (req, res, next) => {
     next(error);
   }
 };
-
-module.exports.createAssignment = async (req, res, next) => {
-  const { subjectId } = req.params;
-  console.log(req.body);
-  const file = req.files;
-  console.log("file", file);
-  const folder = 'assignments';
-  const formatOptions = {//allowed file formats and extensions to upload
-    allowedFormats: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
-    useFilename: true,
-    resourceType: 'raw', //Handle non image files
-  };
-
-  try{
-    const uploadResults =  await uploadDocsToCloudinary(file, folder, formatOptions);
-    console.log('Uploaded Files:', uploadResults);
-    res.status(200).json({
-        success: true,
-        message: "File Uploaded Successfully",
-        fileUrl: uploadResults.secure_url,
-        publicId: uploadResults.public_id,
-    }) 
-
-  } catch(err){
-    res.status(500).send({
-      success: false,
-      message: 'Internal Server Error',
-    })
-  }
-}
