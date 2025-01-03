@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Subject = require('../models/Subject'); // Ensure this path points to your Subject model
 const userModel = require('../models/User'); // Ensure this path points to your User model
+const assignmentModel = require("../models/Assignment");
 const fileUpload = require('express-fileupload');
 const { uploadDocsToCloudinary } = require('../utils/docsUploader');
 
@@ -133,6 +134,14 @@ module.exports.getSubject = async (req, res, next) => {
     console.log('User hai mai kya kr lega bei:', subject);
     console.log('Updated User details fetched:', teacher.firstName, teacher.lastName);
 
+    let assignments = [];
+    if (subject.assignments_id && subject.assignments_id.length > 0) {
+      assignments = await assignmentModel.find({ _id: { $in: subject.assignments_id } })
+        .select('_id title') // Only include ID and title
+        .lean(); // Return plain JavaScript objects
+    }
+    console.log('Assignments:', assignments);
+
     // Construct and return the response
     return res.status(200).json({
       success: true,
@@ -143,7 +152,7 @@ module.exports.getSubject = async (req, res, next) => {
       teacher_name: `${teacher.firstName} ${teacher.lastName}`, // Full teacher name
       teacher_id: subject.teacher_id,
       students: subject.students_id, // Include associated students if applicable
-      assignments: subject.assignments_id, // Include associated assignments if applicable
+      assignments: assignments.length > 0 ? assignments : [], // Include associated assignments if applicable
     });
   } catch (err) {
     console.error('Error fetching subject:', err);
