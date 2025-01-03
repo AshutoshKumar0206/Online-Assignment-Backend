@@ -32,6 +32,6 @@ router.delete("/deletependinguser/:id", verifyAdmin, deletePendingUser);
 router.get("/user", verifyAdmin, getUser);
 
 //Route to delete a particular user (only accessible to verified admins)
-router.delete('/user/:id', verifyAdmin, deleteUser);
+router.delete('/new/:id', verifyAdmin, deleteUser);
 
 module.exports = router;
