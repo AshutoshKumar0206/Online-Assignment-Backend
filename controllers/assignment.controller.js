@@ -1,12 +1,11 @@
-const { uploadDocsToCloudinary } = require('../utils/docsUploader');
-const Assignment = require('../models/Assignment'); // Assignment model
-const Subject = require('../models/Subject'); // Subject model
+const Subject = require('../models/Subject'); // Import Subject model
+const Assignment = require('../models/Assignment'); // Import Assignment model
+const { uploadDocsToCloudinary } = require('../utils/docsUploader'); // Utility for file upload
 
 module.exports.createAssignment = async (req, res) => {
-  const { subjectId } = req.params; // The subject ID passed as a parameter
+  const { id } = req.params; // Subject ID from route parameters
   const { title, description, deadline, createdBy, minVal, maxVal } = req.body;
 
-  // Validate file upload
   if (!req.files || !req.files.file) {
     return res.status(400).json({
       success: false,
@@ -14,48 +13,53 @@ module.exports.createAssignment = async (req, res) => {
     });
   }
 
-  const file = req.files.file;
-  const folder = 'assignments'; // Folder name for Cloudinary
-  const formatOptions = {
-    allowedFormats: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
-    useFilename: true,
-    resourceType: 'raw',
-  };
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: 'Subject ID is required',
+    });
+  }
 
   try {
-    // Step 1: Upload the file to Cloudinary
-    const uploadResults = await uploadDocsToCloudinary(file, folder, formatOptions);
-
-    // Step 2: Create a new assignment object
-    const newAssignment = new Assignment({
-      title,
-      description,
-      deadline,
-      createdBy,
-      subjectId,
-      minVal,
-      maxVal,
-      fileLink: uploadResults.secure_url, // File URL from Cloudinary
-      filePublicId: uploadResults.public_id, // Public ID from Cloudinary
-    });
-
-    const savedAssignment = await newAssignment.save();
-
-    // Step 3: Update the subject to add the assignment ID
-    const updatedSubject = await Subject.findByIdAndUpdate(
-      subjectId,
-      { $push: { assignmentId: savedAssignment._id } }, // Push the new assignment's ID to the subject
-      { new: true } // Return the updated document
-    );
-
-    if (!updatedSubject) {
+    // Step 1: Find the Subject by `subject_id`
+    const subject = await Subject.findOne({ subject_id: id });
+    if (!subject) {
       return res.status(404).json({
         success: false,
         message: 'Subject not found',
       });
     }
 
-    // Step 4: Respond with success
+    // Step 2: Upload the file to Cloudinary
+    const file = req.files.file;
+    const folder = 'assignments';
+    const formatOptions = {
+      allowedFormats: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
+      useFilename: true,
+      resourceType: 'raw',
+    };
+    const uploadResults = await uploadDocsToCloudinary(file, folder, formatOptions);
+
+    // Step 3: Create the Assignment
+    const newAssignment = new Assignment({
+      title,
+      description,
+      deadline,
+      createdBy,
+      subjectId: subject._id, // Link assignment to the subject's `_id`
+      minVal,
+      maxVal,
+      fileLink: uploadResults.secure_url,
+      filePublicId: uploadResults.public_id,
+    });
+
+    const savedAssignment = await newAssignment.save();
+
+    // Step 4: Update the Subject's `assignments_id` field
+    subject.assignments_id.push(savedAssignment._id.toString()); // Add the assignment's ID to the `assignments_id` array
+    await subject.save();
+
+    // Step 5: Respond with success
     return res.status(201).json({
       success: true,
       message: 'Assignment created and linked to subject successfully',
@@ -63,7 +67,6 @@ module.exports.createAssignment = async (req, res) => {
     });
   } catch (err) {
     console.error('Error creating assignment:', err);
-
     return res.status(500).json({
       success: false,
       message: 'Internal Server Error',
