@@ -3,6 +3,7 @@ const Subject = require('../models/Subject'); // Ensure this path points to your
 const userModel = require('../models/User'); // Ensure this path points to your User model
 const fileUpload = require('express-fileupload');
 const { uploadDocsToCloudinary } = require('../utils/docsUploader');
+
 // Helper function to generate a unique subject code
 async function generateUniqueSubjectCode() {
   let code;
@@ -308,32 +309,3 @@ module.exports.joinSubject = async (req, res, next) => {
     next(error);
   }
 };
-
-module.exports.createAssignment = async (req, res, next) => {
-  const { subjectId } = req.params;
-  
-  const file = req.files.file;
-  const folder = 'documents';
-  const formatOptions = {//allowed file formats and extensions to upload
-    allowedFormats: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
-    useFilename: true,
-    resourceType: 'raw', //Handle non image files
-  };
-
-  try{
-    const uploadResults =  await uploadDocsToCloudinary(file, folder, formatOptions);
-    
-    res.status(200).json({
-        success: true,
-        message: "File Uploaded Successfully",
-        fileUrl: uploadResults.secure_url,
-        publicId: uploadResults.public_id,
-    }) 
-
-  } catch(err){
-    res.status(500).send({
-      success: false,
-      message: 'Internal Server Error',
-    })
-  }
-}
