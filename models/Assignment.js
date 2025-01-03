@@ -1,39 +1,42 @@
 const mongoose = require('mongoose');
 
 const AssignmentSchema = new mongoose.Schema({
-    title: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-    },
-    deadline: {
-      type: Date,
-      required: true,
-    },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    subjectId: {
-      type: String,
-      required: true,
-      ref: 'Subject',
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    minVal: {
-      type: Number,
-      default:0
-    },
-    maxVal: {
-      type: Number,
-      required: true,
-    }
-  });
-  
-  module.exports = mongoose.model('Assignment', AssignmentSchema);
+  title: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+  deadline: {
+    type: Date,
+    required: true,
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  subjectId: {
+    type: String,
+    required: true,
+    ref: 'Subject',
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  minVal: {
+    type: Number,
+    default: 0,
+  },
+  maxVal: {
+    type: Number,
+    required: true,
+  },
+  fileLink: {
+    type: String,
+  },
+});
+
+module.exports = mongoose.model('Assignment', AssignmentSchema);
