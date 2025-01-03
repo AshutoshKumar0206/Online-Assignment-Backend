@@ -8,6 +8,7 @@ const fileUpload = require("express-fileupload");
 const indexRoutes = require("./routes/index.route");
 const userRoutes = require("./routes/user.routes");
 const adminRoutes = require("./routes/admin.route");
+const assignmentRoutes = require("./routes/assignment.route");
 const PORT = process.env.PORT || 8000;
 
 //To initialize a server
@@ -42,6 +43,7 @@ app.use(
 )
 //cloudinary connection
 cloudinaryConnect();
+app.use("/assignment", assignmentRoutes);
 
 const users = {}; //To store active users and select the users to chat with
 io.on('connection', (socket) => {

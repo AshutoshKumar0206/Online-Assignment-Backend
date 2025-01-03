@@ -26,6 +26,7 @@ router.get("/getsubject/:id", isAuthenticated, subjectController.getSubject);
 router.post("/addstudent/:id", isAuthenticated, subjectController.addStudent);
 router.post("/removestudent/:id", isAuthenticated, subjectController.removeStudent);
 router.post('/join/:id', isAuthenticated, subjectController.joinSubject);
+
 router.post('/subject/assignment/new/:id', isAuthenticated, subjectController.createAssignment);
 
 module.exports = router;

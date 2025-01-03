@@ -3,6 +3,7 @@ const Subject = require('../models/Subject'); // Ensure this path points to your
 const userModel = require('../models/User'); // Ensure this path points to your User model
 const fileUpload = require('express-fileupload');
 const { uploadDocsToCloudinary } = require('../utils/docsUploader');
+
 // Helper function to generate a unique subject code
 async function generateUniqueSubjectCode() {
   let code;
