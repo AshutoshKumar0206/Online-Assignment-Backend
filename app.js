@@ -3,9 +3,12 @@ const app= express();
 require("dotenv").config();
 const cors = require("cors");
 const connectDB = require("./config/mongodb");
+const {cloudinaryConnect } = require("./config/cloudinary");
+const fileUpload = require("express-fileupload");
 const indexRoutes = require("./routes/index.route");
 const userRoutes = require("./routes/user.routes");
 const adminRoutes = require("./routes/admin.route");
+const assignmentRoutes = require("./routes/assignment.route");
 const PORT = process.env.PORT || 8000;
 
 //To initialize a server
@@ -32,6 +35,15 @@ app.use(cors());
 app.use("/", indexRoutes);
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);
+app.use(
+	fileUpload({
+		useTempFiles:true,
+		tempFileDir:"/tmp",
+	})
+)
+//cloudinary connection
+cloudinaryConnect();
+app.use("/assignment", assignmentRoutes);
 
 const users = {}; //To store active users and select the users to chat with
 io.on('connection', (socket) => {

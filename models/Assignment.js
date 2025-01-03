@@ -18,9 +18,9 @@ const AssignmentSchema = new mongoose.Schema({
     required: true,
   },
   subjectId: {
-    type: String,
-    required: true,
+    type: mongoose.Schema.Types.ObjectId, // Reference to Subject as ObjectId
     ref: 'Subject',
+    required: true,
   },
   createdAt: {
     type: Date,
@@ -36,6 +36,9 @@ const AssignmentSchema = new mongoose.Schema({
   },
   fileLink: {
     type: String,
+  },
+  filePublicId: {
+    type: String, // Cloudinary's public ID for file management
   },
 });
 
