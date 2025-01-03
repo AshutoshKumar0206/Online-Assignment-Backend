@@ -3,7 +3,7 @@ const app= express();
 require("dotenv").config();
 const cors = require("cors");
 const connectDB = require("./config/mongodb");
-const {cloudinaryConnect } = require("./config/cloudinary");
+const { cloudinaryConnect } = require("./config/cloudinary");
 const fileUpload = require("express-fileupload");
 const indexRoutes = require("./routes/index.route");
 const userRoutes = require("./routes/user.routes");

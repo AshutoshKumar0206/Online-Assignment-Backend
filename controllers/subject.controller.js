@@ -311,9 +311,10 @@ module.exports.joinSubject = async (req, res, next) => {
 
 module.exports.createAssignment = async (req, res, next) => {
   const { subjectId } = req.params;
-  
-  const file = req.files.file;
-  const folder = 'documents';
+  console.log(req.body);
+  const file = req.files;
+  console.log("file", file);
+  const folder = 'assignments';
   const formatOptions = {//allowed file formats and extensions to upload
     allowedFormats: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
     useFilename: true,
@@ -322,7 +323,7 @@ module.exports.createAssignment = async (req, res, next) => {
 
   try{
     const uploadResults =  await uploadDocsToCloudinary(file, folder, formatOptions);
-    
+    console.log('Uploaded Files:', uploadResults);
     res.status(200).json({
         success: true,
         message: "File Uploaded Successfully",

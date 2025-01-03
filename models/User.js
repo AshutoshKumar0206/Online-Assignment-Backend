@@ -18,6 +18,9 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  rollNo: {
+    type: String,
+  },
   token: {
     type: String,
   },

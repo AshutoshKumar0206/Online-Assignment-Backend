@@ -401,7 +401,19 @@ module.exports.dashboard = async (req, res, next) => {
   }
 };
 
-
+module.exports.Profile = async (req, res, next) => {
+  const { userId } = req.params;
+  try{
+      const user = await userModel.findById(userId).select("-password -subjects -role");
+      
+        
+  }catch(err){
+    res.status(500).json({ 
+      success: false,
+      message: "Error fetching User Profile",
+    });
+  }
+}
 
 
 // Controller for Changing Password
