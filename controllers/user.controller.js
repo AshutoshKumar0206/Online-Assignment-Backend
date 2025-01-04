@@ -11,7 +11,7 @@ const resetTemplate = require("../mail/resetPassOtp")
 const mailSender = require("../utils/mailSender");
 const passwordUpdated = require("../mail/PasswordUpdate");
 const Subject = require('../models/Subject');
-
+const mongoose = require('mongoose');
 module.exports.signup = async (req, res, next) => {
   try {
     const { firstName, lastName, email, password, confirmPassword, role } = req.body;
@@ -401,6 +401,78 @@ module.exports.dashboard = async (req, res, next) => {
   }
 };
 
+module.exports.Profile = async (req, res, next) => {
+  let userId = req.params.id;
+  userId = new mongoose.Types.ObjectId(userId); 
+  
+  try{
+      const user = await userModel.findById(userId).select("-password -subjects -role");
+      console.log('User:', user);
+      if(!user){
+          res.status(404).json({
+            success: false,
+            message: "User not found",
+          })
+      }
+      res.status(200).json({
+        success: true,
+        message: "User Profile",
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        rollNo: user.rollNo,
+      })
+
+  }catch(err){
+    res.status(500).json({ 
+      success: false,
+      message: "Error fetching User Profile",
+    });
+  }
+}
+
+module.exports.updateProfile = async (req, res, next) => {
+  let userId = req.params.id;
+  userId = new mongoose.Types.ObjectId(userId);
+  let email = req.body.email;
+  let userName = req.body.userName;
+  let rollNo = req.body.rollNo;
+  let branch = req.body.branch;
+  let semester = req.body.semester;
+  let contact = req.body.contact;
+  let section = req.body.section;
+  userName = userName.trim().split(' ');
+
+  try{
+    const updatedUser = await userModel.findByIdAndUpdate(userId, {email : email, firstName : userName[0], lastName : userName[1], 
+                                                                  rollNo : rollNo, contact : contact, section : section, 
+                                                                  branch : branch, semester : semester}, {new: true});
+    console.log('Updated User:', updatedUser); 
+    if(!updatedUser){
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User Profile Updated Successfully",
+      email: updatedUser.email,
+      userName: updatedUser.firstName + " " + updatedUser.lastName,
+      rollNo: updatedUser.rollNo,
+      branch: updatedUser.branch,
+      semester: updatedUser.semester,
+      contact: updatedUser.contact,
+      section: updatedUser.section,
+    })
+  } catch(err){
+      res.status(500).json({ 
+        success: false, 
+        message: "Error updating User Profile", 
+      });
+  }  
+}
 
 
 
