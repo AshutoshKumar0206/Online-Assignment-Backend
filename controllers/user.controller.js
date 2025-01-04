@@ -421,6 +421,11 @@ module.exports.Profile = async (req, res, next) => {
         lastName: user.lastName,
         email: user.email,
         rollNo: user.rollNo,
+        branch: user.branch,
+        semester: user.semester,
+        contact: user.contact,
+        section: user.section,
+        updatedAt: user.updatedAt,
       })
 
   }catch(err){
