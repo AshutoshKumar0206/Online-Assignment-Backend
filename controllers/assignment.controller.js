@@ -73,3 +73,34 @@ module.exports.createAssignment = async (req, res) => {
     });
   }
 };
+
+
+module.exports.getAssignmentDetails = async (req, res, next) => {
+  const { id } = req.params; // Get assignment ID from request params
+
+  try {
+    // Find the assignment by ID
+    const assignment = await Assignment.findById(id);
+
+    if (!assignment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Assignment not found.',
+      });
+    }
+
+    
+
+    // Respond with the assignment and subject details
+    return res.status(200).json({
+      success: true,
+      message: 'Assignment fetched successfully.',
+      assignment: {
+        ...assignment.toObject(), // Convert assignment to plain object
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching assignment details:', error);
+    next(error); // Pass the error to the next middleware for handling
+  }
+};
