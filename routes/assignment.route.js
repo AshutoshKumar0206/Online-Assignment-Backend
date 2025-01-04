@@ -4,7 +4,10 @@ const assignmentController = require("../controllers/assignment.controller");
 const { isAuthenticated } = require("../middlewares/auth.middleware"); // Move middleware to a separate file for modularity
 
 
-
+// post route to create a new assignment
 router.post('/new/:id', isAuthenticated, assignmentController.createAssignment);
+
+//get route to get details of an assignment
+router.get("/:id", isAuthenticated, assignmentController.getAssignmentDetails);
 
 module.exports = router;
