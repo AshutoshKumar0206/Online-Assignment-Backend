@@ -1,24 +1,34 @@
 const cloudinary = require('cloudinary').v2;
 
-exports.uploadDocsToCloudinary = async (file, folder, formatOptions = {}) => {
-  const options = { folder };
-  options.resource_type = formatOptions.resourceType || 'raw'; // Fixed typo
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-  if (formatOptions.quality) {
-    options.quality = formatOptions.quality;
+exports.uploadDocsToCloudinary = async (file, folder, formatOptions = {}) => {
+  const allowedExtensions = ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'];
+
+  // Extract the file extension
+  const fileExtension = file.name.split('.').pop().toLowerCase();
+
+  // Validate file extension
+  if (!allowedExtensions.includes(fileExtension)) {
+    throw new Error(`Unsupported file type. Allowed extensions: ${allowedExtensions.join(', ')}`);
   }
+
+  const options = {
+    folder,
+    resource_type: 'raw', // Needed for non-image files
+  };
 
   if (formatOptions.useFilename) {
     options.use_filename = true;
     options.unique_filename = false;
   }
 
-  if (formatOptions.allowedFormats) {
-    options.allowed_formats = formatOptions.allowedFormats; // Ensure correct spelling
-  }
-
   try {
-    // Upload file to Cloudinary
+    // Upload the file to Cloudinary
     const uploadedDocs = await cloudinary.uploader.upload(file.tempFilePath, options);
     console.log('Uploaded Docs:', uploadedDocs);
 
@@ -26,7 +36,6 @@ exports.uploadDocsToCloudinary = async (file, folder, formatOptions = {}) => {
     return uploadedDocs;
   } catch (err) {
     console.error('Error uploading to Cloudinary:', err);
-    // Throw the error to be handled by the calling function
-    throw new Error('Error uploading to Cloudinary');
+    throw new Error(err.message || 'Error uploading to Cloudinary');
   }
 };
