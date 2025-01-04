@@ -20,6 +20,22 @@ module.exports.createAssignment = async (req, res) => {
     });
   }
 
+  const file = req.files.file;
+
+  // Check file type
+  const allowedMimeTypes = [
+    'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain'
+  ];
+  if (!allowedMimeTypes.includes(file.mimetype)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Unsupported file type. Allowed formats: pdf, doc, docx, txt, xls, xlsx, ppt, pptx',
+    });
+  }
+
   try {
     // Step 1: Find the Subject by `subject_id`
     const subject = await Subject.findOne({ subject_id: id });
@@ -31,7 +47,6 @@ module.exports.createAssignment = async (req, res) => {
     }
 
     // Step 2: Upload the file to Cloudinary
-    const file = req.files.file;
     const folder = 'assignments';
     const formatOptions = {
       allowedFormats: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
@@ -56,7 +71,7 @@ module.exports.createAssignment = async (req, res) => {
     const savedAssignment = await newAssignment.save();
 
     // Step 4: Update the Subject's `assignments_id` field
-    subject.assignments_id.push(savedAssignment._id.toString()); // Add the assignment's ID to the `assignments_id` array
+    subject.assignments_id.push(savedAssignment._id.toString());
     await subject.save();
 
     // Step 5: Respond with success
@@ -73,6 +88,7 @@ module.exports.createAssignment = async (req, res) => {
     });
   }
 };
+
 
 
 module.exports.getAssignmentDetails = async (req, res, next) => {
