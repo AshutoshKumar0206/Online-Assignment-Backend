@@ -14,6 +14,26 @@ const UserSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  rollNo:{
+    type: String,
+    default: 'BTECH/XXXXX/XX',
+  },
+  branch:{
+    type: String,
+    default: 'XXXXXXXXXXXXXXXXX',
+  },
+  semester:{
+    type: String,
+    default: 'X',    
+  },
+  section:{
+    type: String,
+    default: 'X',     
+  },
+  contact:{
+    type: String,
+    default: "XXXXXXXXXX"
+  },
   password: {
     type: String,
     required: true,
