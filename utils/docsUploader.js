@@ -18,8 +18,12 @@ exports.uploadDocsToCloudinary = async (file, folder, formatOptions = {}) => {
     throw new Error(`Unsupported file type. Allowed extensions: ${allowedExtensions.join(', ')}`);
   }
   const fileName = path.basename(file.name, path.extname(file.name)); // Get the base name without extension
-  const publicIdWithExtension = `${fileName}.${fileExtension}`;
-  
+  let publicIdWithExtension;
+  // if(fileExtension !== 'pdf') {
+   publicIdWithExtension = `${fileName}.${fileExtension}`;
+  // } else{
+    // publicIdWithExtension = fileName;
+  // }
   const options = {
     folder,
     resource_type: 'raw', // Needed for non-image files
