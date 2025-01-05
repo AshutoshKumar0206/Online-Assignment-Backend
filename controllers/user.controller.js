@@ -406,7 +406,7 @@ module.exports.Profile = async (req, res, next) => {
   userId = new mongoose.Types.ObjectId(userId); 
   
   try{
-      const user = await userModel.findById(userId).select("-password -subjects -role");
+      const user = await userModel.findById(userId).select("-password -subjects");
       console.log('User:', user);
       if(!user){
           res.status(404).json({
@@ -421,6 +421,7 @@ module.exports.Profile = async (req, res, next) => {
         lastName: user.lastName,
         email: user.email,
         rollNo: user.rollNo,
+        role: user.role,
         branch: user.branch,
         semester: user.semester,
         contact: user.contact,
@@ -439,19 +440,23 @@ module.exports.Profile = async (req, res, next) => {
 module.exports.updateProfile = async (req, res, next) => {
   let userId = req.params.id;
   userId = new mongoose.Types.ObjectId(userId);
+  console.log('body', req.body);
   let email = req.body.email;
-  let userName = req.body.userName;
-  let rollNo = req.body.rollNo;
-  let branch = req.body.branch;
-  let semester = req.body.semester;
-  let contact = req.body.contact;
-  let section = req.body.section;
-  userName = userName.trim().split(' ');
+  // let userName = req.body.profileInput.userName;
+  let firstName = req.body.profileInput.firstName;
+  let lastName = req.body.profileInput.lastName;
+  let rollNo = req.body.profileInput.rollNo;
+  let branch = req.body.profileInput.branch;
+  let semester = req.body.profileInput.semester;
+  let contact = req.body.profileInput.contact;
+  let section = req.body.profileInput.section;
+  // userName = userName.trim().split(' ');
 
   try{
-    const updatedUser = await userModel.findByIdAndUpdate(userId, {email : email, firstName : userName[0], lastName : userName[1], 
-                                                                  rollNo : rollNo, contact : contact, section : section, 
-                                                                  branch : branch, semester : semester}, {new: true});
+    const updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
+                                                                   rollNo, contact, 
+                                                                  section, branch, 
+                                                                   semester}, {new: true});
     console.log('Updated User:', updatedUser); 
     if(!updatedUser){
       res.status(404).json({
@@ -464,7 +469,9 @@ module.exports.updateProfile = async (req, res, next) => {
       success: true,
       message: "User Profile Updated Successfully",
       email: updatedUser.email,
-      userName: updatedUser.firstName + " " + updatedUser.lastName,
+      // userName: updatedUser.firstName + " " + updatedUser.lastName,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
       rollNo: updatedUser.rollNo,
       branch: updatedUser.branch,
       semester: updatedUser.semester,
