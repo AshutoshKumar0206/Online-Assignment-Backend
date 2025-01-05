@@ -51,10 +51,13 @@ module.exports.createAssignment = async (req, res) => {
     const formatOptions = {
       allowedFormats: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
       useFilename: true,
-      resourceType: 'raw',
+      resourceType: 'auto',
     };
     const uploadResults = await uploadDocsToCloudinary(file, folder, formatOptions);
-
+    console.log('Uploaded file:', uploadResults);
+    const publicId = uploadResults.public_id;
+    const fileUrl = uploadResults.secure_url;
+    
     // Step 3: Create the Assignment
     const newAssignment = new Assignment({
       title,
