@@ -427,6 +427,8 @@ module.exports.Profile = async (req, res, next) => {
         contact: user.contact,
         section: user.section,
         updatedAt: user.updatedAt,
+        exprerience: user.exprerience,
+        employeeId: user.employeeId,
       })
 
   }catch(err){
@@ -450,13 +452,15 @@ module.exports.updateProfile = async (req, res, next) => {
   let semester = req.body.profileInput.semester;
   let contact = req.body.profileInput.contact;
   let section = req.body.profileInput.section;
+  let exprerience = req.body.profileInput.exprerience;
+  let employeeId = req.body.profileInput.employeeId;
   // userName = userName.trim().split(' ');
 
   try{
     const updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
                                                                    rollNo, contact, 
                                                                   section, branch, 
-                                                                   semester}, {new: true});
+                                                                   semester, exprerience,employeeId}, {new: true});
     console.log('Updated User:', updatedUser); 
     if(!updatedUser){
       res.status(404).json({
@@ -477,6 +481,9 @@ module.exports.updateProfile = async (req, res, next) => {
       semester: updatedUser.semester,
       contact: updatedUser.contact,
       section: updatedUser.section,
+      role: updatedUser.role,
+      exprerience: updatedUser.exprerience,
+      employeeId: updatedUser.employeeId,
     })
   } catch(err){
       res.status(500).json({ 

@@ -58,6 +58,14 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  employeeId: {
+    type: String,
+    default: 'XXXXXXXXX',
+  },
+  exprerience: {
+    type: Number,
+    default: 0.5,
+  }
 });
 
 module.exports = mongoose.model('User', UserSchema);
