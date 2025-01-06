@@ -21,6 +21,7 @@ router.post("/resetpassword", userController.resetPassword);
 router.get("/dashboard/:id", isAuthenticated,userController.dashboard);
 router.get("/profile/:id", isAuthenticated, userController.Profile);
 router.put("/updateprofile/:id", isAuthenticated, userController.updateProfile);
+router.put("/updatedisplaypicture/:id", isAuthenticated, userController.updateDisplayPicture);
 
 //Subject Routes
 router.post("/addsubject/:id", isAuthenticated, subjectController.createSubject);
