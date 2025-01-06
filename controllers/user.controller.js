@@ -492,8 +492,35 @@ module.exports.updateProfile = async (req, res, next) => {
       });
   }  
 }
-
-
+module.exports.updateDisplayPicture = async (req, res, next) => {
+try{
+  const displayPicture = req.files.displayPicture;
+  const userId = req.params.id;
+  userId = new mongoose.Types.ObjectId(userId);
+  const image = await uploadImageToCloudinary(
+    displayPicture,
+    process.env.FOLDER_NAME,
+    1000,
+    1000
+  )
+  console.log(image);
+  const updatedProfile = await userModel.findByIdAndUpdate(
+    userId,
+    { image: image.secure_url },
+    { new: true }
+  )
+  res.send({
+    success: true,
+    message: `Image Updated successfully`,
+    data: updatedProfile,
+  })
+} catch(err){
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    }) 
+}
+}
 
 // Controller for Changing Password
 // exports.changePassword = async (req, res) => {

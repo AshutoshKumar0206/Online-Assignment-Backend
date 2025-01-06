@@ -1,7 +1,7 @@
 const Subject = require('../models/Subject'); // Import Subject model
 const Assignment = require('../models/Assignment'); // Import Assignment model
 const { uploadDocsToCloudinary } = require('../utils/docsUploader'); // Utility for file upload
-
+require('dotenv').config();
 module.exports.createAssignment = async (req, res) => {
   const { id } = req.params; // Subject ID from route parameters
   const { title, description, deadline, createdBy, minVal, maxVal } = req.body;
@@ -47,7 +47,7 @@ module.exports.createAssignment = async (req, res) => {
     }
 
     // Step 2: Upload the file to Cloudinary
-    const folder = 'assignments';
+    const folder = process.env.FOLDER_NAME;
     const formatOptions = {
       allowedFormats: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
       useFilename: true,
