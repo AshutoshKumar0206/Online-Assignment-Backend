@@ -2,7 +2,7 @@ const Subject = require('../models/Subject'); // Import Subject model
 const Assignment = require('../models/Assignment'); // Import Assignment model
 const { uploadDocsToCloudinary } = require('../utils/docsUploader'); // Utility for file upload
 const multer = require('multer');
-const { Submission } = require('../models/submission');
+const Submission = require('../models/Submission');
 const upload = multer({ dest: 'uploads/' }); // Temporary storage before cloud upload
 require('dotenv').config();
 module.exports.createAssignment = async (req, res) => {
@@ -128,25 +128,56 @@ module.exports.getAssignmentDetails = async (req, res, next) => {
 };
 
 module.exports.submitAssignment = async (req, res) => {
-  const { assignmentId } = req.params;
+  const assignmentId  = req.params.id;
   const studentId = req.user.id; // Assuming JWT-based authentication
-
+ 
   try {
-    // Upload file to AWS S3/Cloudinary (implement cloud storage service here)
-    const fileURL = await uploadFileToCloud(req.file);
+    const file = req.files.fileupload;
+    console.log(file);
+    // Check file type
+    const allowedMimeTypes = [
+      'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'text/plain'
+    ];
+
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Unsupported file type. Allowed formats: pdf, doc, docx, txt, xls, xlsx, ppt, pptx',
+      });
+    }
+
+    const folder = process.env.FOLDER_NAME;
+    const formatOptions = {
+      allowedFormats: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
+      useFilename: true,
+      resourceType: 'auto',
+    };
+    const uploadFile = await uploadDocsToCloudinary(file, folder, formatOptions);
+     console.log('Uploading assignment', uploadFile);
 
     // Create a submission document in the database
     const submission = new Submission({
       assignmentId,
       studentId,
-      fileURL,
+      fileURL: uploadFile.secure_url,
       submissionDate: new Date(),
       status: 'submitted',
     });
 
     await submission.save();
-    res.status(201).json({ message: 'Submission successful', submission });
+    
+    res.status(201).json({ 
+      success:true,
+      message: 'Submission successful', 
+      submission, 
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to submit assignment' });
+    res.status(500).json({ 
+      success:false,
+      message: 'Failed to submit assignment' 
+    });
   }
 }
