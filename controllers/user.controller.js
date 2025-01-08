@@ -12,6 +12,9 @@ const mailSender = require("../utils/mailSender");
 const passwordUpdated = require("../mail/PasswordUpdate");
 const Subject = require('../models/Subject');
 const mongoose = require('mongoose');
+const { uploadImageToCloudinary } = require('../utils/imageUploader')
+require('dotenv').config();
+
 module.exports.signup = async (req, res, next) => {
   try {
     const { firstName, lastName, email, password, confirmPassword, role } = req.body;
@@ -494,8 +497,14 @@ module.exports.updateProfile = async (req, res, next) => {
 }
 module.exports.updateDisplayPicture = async (req, res, next) => {
 try{
+  if (!req.files || !req.files.displayPicture) {
+    return res.status(400).json({
+      success: false,
+      message: "No file uploaded",
+    });
+  }
   const displayPicture = req.files.displayPicture;
-  const userId = req.params.id;
+  userId = req.params.id;
   userId = new mongoose.Types.ObjectId(userId);
   const image = await uploadImageToCloudinary(
     displayPicture,

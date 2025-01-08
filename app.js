@@ -32,15 +32,16 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cors());
-app.use("/", indexRoutes);
-app.use("/user", userRoutes);
-app.use("/admin", adminRoutes);
 app.use(
 	fileUpload({
 		useTempFiles:true,
 		tempFileDir:"/tmp",
+        limits: { fileSize: 50 * 1024 * 1024 }
 	})
 )
+app.use("/", indexRoutes);
+app.use("/user", userRoutes);
+app.use("/admin", adminRoutes);
 //cloudinary connection
 cloudinaryConnect();
 app.use("/assignment", assignmentRoutes);
