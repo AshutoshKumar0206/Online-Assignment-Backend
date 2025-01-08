@@ -432,6 +432,7 @@ module.exports.Profile = async (req, res, next) => {
         updatedAt: user.updatedAt,
         exprerience: user.exprerience,
         employeeId: user.employeeId,
+        image: user.secure_url,
       })
 
   }catch(err){
@@ -457,6 +458,7 @@ module.exports.updateProfile = async (req, res, next) => {
   let section = req.body.profileInput.section;
   let exprerience = req.body.profileInput.exprerience;
   let employeeId = req.body.profileInput.employeeId;
+
   // userName = userName.trim().split(' ');
 
   try{
@@ -487,6 +489,7 @@ module.exports.updateProfile = async (req, res, next) => {
       role: updatedUser.role,
       exprerience: updatedUser.exprerience,
       employeeId: updatedUser.employeeId,
+      image: updatedUser.secure_url,
     })
   } catch(err){
       res.status(500).json({ 
