@@ -503,6 +503,7 @@ try{
       message: "No file uploaded",
     });
   }
+  
   const displayPicture = req.files.displayPicture;
   userId = req.params.id;
   userId = new mongoose.Types.ObjectId(userId);
