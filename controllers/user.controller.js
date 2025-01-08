@@ -432,7 +432,7 @@ module.exports.Profile = async (req, res, next) => {
         updatedAt: user.updatedAt,
         exprerience: user.exprerience,
         employeeId: user.employeeId,
-        image: user.secure_url,
+        image: user.image,
       })
 
   }catch(err){
