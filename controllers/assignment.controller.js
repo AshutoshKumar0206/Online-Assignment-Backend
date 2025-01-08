@@ -1,6 +1,9 @@
 const Subject = require('../models/Subject'); // Import Subject model
 const Assignment = require('../models/Assignment'); // Import Assignment model
 const { uploadDocsToCloudinary } = require('../utils/docsUploader'); // Utility for file upload
+const multer = require('multer');
+const { Submission } = require('../models/submission');
+const upload = multer({ dest: 'uploads/' }); // Temporary storage before cloud upload
 require('dotenv').config();
 module.exports.createAssignment = async (req, res) => {
   const { id } = req.params; // Subject ID from route parameters
@@ -123,3 +126,27 @@ module.exports.getAssignmentDetails = async (req, res, next) => {
     next(error); // Pass the error to the next middleware for handling
   }
 };
+
+module.exports.submitAssignment = async (req, res) => {
+  const { assignmentId } = req.params;
+  const studentId = req.user.id; // Assuming JWT-based authentication
+
+  try {
+    // Upload file to AWS S3/Cloudinary (implement cloud storage service here)
+    const fileURL = await uploadFileToCloud(req.file);
+
+    // Create a submission document in the database
+    const submission = new Submission({
+      assignmentId,
+      studentId,
+      fileURL,
+      submissionDate: new Date(),
+      status: 'submitted',
+    });
+
+    await submission.save();
+    res.status(201).json({ message: 'Submission successful', submission });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to submit assignment' });
+  }
+}
