@@ -4,7 +4,9 @@ const { uploadDocsToCloudinary } = require('../utils/docsUploader'); // Utility 
 const multer = require('multer');
 const Submission = require('../models/Submission');
 const upload = multer({ dest: 'uploads/' }); // Temporary storage before cloud upload
+const mongoose = require('mongoose');
 require('dotenv').config();
+
 module.exports.createAssignment = async (req, res) => {
   const { id } = req.params; // Subject ID from route parameters
   const { title, description, deadline, createdBy, minVal, maxVal } = req.body;
@@ -184,21 +186,21 @@ module.exports.submitAssignment = async (req, res) => {
 
 module.exports.getAllAssignments = async (req, res) => {
   try {
-    const { id } = req.params;
-
+    let id  = req.params.id;
+    id = new mongoose.Types.ObjectId(id);
     // Fetch submissions for the given assignmentId and populate student details (name, rollNo)
     const submissions = await Submission.find({ assignmentId: id })
-      .populate("studentId", "name rollNo")  
+      .populate("studentId", "firstName lastName rollNo")  
       .select("fileURL")  
 
       console.log(`Submissions are: ${submissions}`);
-
     res.status(200).json({
       success: true,
-      message: "Assignments fetched successfully.",
+      message: "Assignment submissions fetched successfully.",
       submissions: submissions.map(submission => ({
-        studentId: submission.studentId._id,  
-        name: submission.studentId.name,      
+        studentId: submission.studentId._id,
+        firstName: submission.studentId.firstName,
+        lastName: submission.studentId.lastName,
         rollNo: submission.studentId.rollNo,  
         fileURL: submission.fileURL           
       })),
