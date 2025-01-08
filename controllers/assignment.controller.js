@@ -181,3 +181,31 @@ module.exports.submitAssignment = async (req, res) => {
     });
   }
 }
+
+module.exports.getAllAssignments = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Fetch submissions for the given assignmentId and populate student details (name, rollNo)
+    const submissions = await Submission.find({ assignmentId: id })
+      .populate("studentId", "name rollNo")  
+      .select("fileURL")  
+
+      console.log(`Submissions are: ${submissions}`);
+
+    res.status(200).json({
+      success: true,
+      message: "Assignments fetched successfully.",
+      submissions: submissions.map(submission => ({
+        studentId: submission.studentId._id,  
+        name: submission.studentId.name,      
+        rollNo: submission.studentId.rollNo,  
+        fileURL: submission.fileURL           
+      })),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch submissions" });
+  }
+};
+
