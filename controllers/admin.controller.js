@@ -191,12 +191,21 @@ module.exports.getUser = async (req, res, next) => {
       role: user.role,
     }));
 
-    res.status(200).json({ success: true, users: formattedUsers });
+    // Separate users into two arrays based on their roles
+    const students = formattedUsers.filter(user => user.role === 'student');
+    const teachers = formattedUsers.filter(user => user.role === 'teacher');
+
+    res.status(200).json({
+      success: true,
+      students,
+      teachers,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error in Fetching Users detail" });
   }
 };
+
 
 
 module.exports.deleteUser = async (req, res, next) => {
