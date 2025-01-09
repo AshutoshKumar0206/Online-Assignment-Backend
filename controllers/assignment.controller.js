@@ -129,19 +129,40 @@ module.exports.getAssignmentDetails = async (req, res, next) => {
   }
 };
 
+// const Assignment = require('path-to-your-assignment-model'); // Import the Assignment model
+
 module.exports.submitAssignment = async (req, res) => {
-  const assignmentId  = req.params.id;
+  const assignmentId = req.params.id;
   const studentId = req.user.id; // Assuming JWT-based authentication
- 
+
   try {
+    // Fetch the assignment details
+    const assignment = await Assignment.findById(assignmentId);
+    if (!assignment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Assignment not found',
+      });
+    }
+
+    // Check if the deadline has passed
+    const currentTime = new Date();
+    if (currentTime > new Date(assignment.deadline)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Deadline for this assignment has passed. Submission is not allowed.',
+      });
+    }
+
     const file = req.files.fileupload;
     console.log(file);
+
     // Check file type
     const allowedMimeTypes = [
       'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'text/plain'
+      'text/plain',
     ];
 
     if (!allowedMimeTypes.includes(file.mimetype)) {
@@ -158,31 +179,32 @@ module.exports.submitAssignment = async (req, res) => {
       resourceType: 'auto',
     };
     const uploadFile = await uploadDocsToCloudinary(file, folder, formatOptions);
-     console.log('Uploading assignment', uploadFile);
+    console.log('Uploading assignment', uploadFile);
 
     // Create a submission document in the database
     const submission = new Submission({
       assignmentId,
       studentId,
       fileURL: uploadFile.secure_url,
-      submissionDate: new Date(),
+      submissionDate: currentTime,
       status: 'submitted',
     });
 
     await submission.save();
-    
+
     res.status(201).json({ 
-      success:true,
+      success: true,
       message: 'Submission successful', 
       submission, 
     });
   } catch (error) {
+    console.error(error); // Log the error for debugging
     res.status(500).json({ 
-      success:false,
+      success: false,
       message: 'Failed to submit assignment' 
     });
   }
-}
+};
 
 module.exports.getAllAssignments = async (req, res) => {
   try {
