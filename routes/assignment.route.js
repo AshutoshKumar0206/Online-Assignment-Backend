@@ -15,5 +15,6 @@ router.post("/submitassignment/:id", isAuthenticated, assignmentController.submi
 
 //route to get all submissions of the assignment
 router.get("/submission/:id", isAuthenticated, assignmentController.getAllAssignments);
+router.put("/updateassignment/:id", isAuthenticated, assignmentController.updateAssignment);
 
 module.exports = router;

@@ -5,6 +5,7 @@ const multer = require('multer');
 const Submission = require('../models/Submission');
 const upload = multer({ dest: 'uploads/' }); // Temporary storage before cloud upload
 const mongoose = require('mongoose');
+const { response } = require('express');
 require('dotenv').config();
 
 module.exports.createAssignment = async (req, res) => {
@@ -50,7 +51,7 @@ module.exports.createAssignment = async (req, res) => {
         message: 'Subject not found',
       });
     }
-
+    
     // Step 2: Upload the file to Cloudinary
     const folder = process.env.FOLDER_NAME;
     const formatOptions = {
@@ -61,8 +62,8 @@ module.exports.createAssignment = async (req, res) => {
     const uploadResults = await uploadDocsToCloudinary(file, folder, formatOptions);
     console.log('Uploaded file:', uploadResults);
     const publicId = uploadResults.public_id;
-    const fileUrl = uploadResults.secure_url;
-    
+    const fileUrl = uploadResults.secure_url; 
+
     // Step 3: Create the Assignment
     const newAssignment = new Assignment({
       title,
@@ -233,3 +234,43 @@ module.exports.getAllAssignments = async (req, res) => {
   }
 };
 
+module.exports.updateAssignment = async (req, res, next) => {
+let assignmentId = req.params.id;
+assignmentId = new mongoose.Types.ObjectId(assignmentId);
+let title = req.body.title;
+let description = req.body.description;
+let deadline = req.body.deadline;
+let maxVal = req.body.maxVal;
+let CreatedBy = req.body.createdBy;
+
+try{
+  const updatedAssignmentDetails = await Assignment.findByIdAndUpdate(assignmentId, {title: title, description : description, 
+                                                                                      deadline: deadline, maxVal: maxVal,
+                                                                                    createdBy : CreatedBy}, 
+                                                                                        {new : true});
+  
+    console.log('After Updation:', updatedAssignmentDetails);
+    if(!updatedAssignmentDetails){
+      res.status(404).json({
+        success: false,
+        message: "Assignment not found",
+      })
+    }
+
+    res.status(200).json({
+    success: true,
+    message: "Assignment updated successfully",
+    title: updatedAssignmentDetails.title,
+    description: updatedAssignmentDetails.description,
+    deadline: updatedAssignmentDetails.deadline,
+    maxVal: updatedAssignmentDetails.maxVal,
+    createdBy: updatedAssignmentDetails.createdBy,
+  });  
+
+} catch(err) {
+   res.status(500).json({ 
+    success: false,
+    message: "Error in Updating Assignment",
+  });
+}
+}
