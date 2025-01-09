@@ -263,16 +263,16 @@ module.exports.getAllAssignments = async (req, res) => {
 module.exports.updateAssignment = async (req, res, next) => {
 let assignmentId = req.params.id;
 assignmentId = new mongoose.Types.ObjectId(assignmentId);
-let title = req.body.title;
-let description = req.body.description;
-let deadline = req.body.deadline;
-let maxVal = req.body.maxVal;
-let CreatedBy = req.body.createdBy;
-
+console.log(req.body, " body ");
+let title = req.body.assignment.title;
+let description = req.body.assignment.description;
+let deadline = req.body.assignment.deadline;
+let maxVal = req.body.assignment.maxVal;
+let minVal = req.body.assignment.minVal;
+console.log(title, description, deadline, maxVal, minVal);
 try{
   const updatedAssignmentDetails = await Assignment.findByIdAndUpdate(assignmentId, {title: title, description : description, 
-                                                                                      deadline: deadline, maxVal: maxVal,
-                                                                                    createdBy : CreatedBy}, 
+                                                                                      deadline: deadline, minVal : minVal, maxVal: maxVal}, 
                                                                                         {new : true});
   
     console.log('After Updation:', updatedAssignmentDetails);
@@ -289,6 +289,7 @@ try{
     title: updatedAssignmentDetails.title,
     description: updatedAssignmentDetails.description,
     deadline: updatedAssignmentDetails.deadline,
+    minVal: updatedAssignmentDetails.minVal,
     maxVal: updatedAssignmentDetails.maxVal,
     createdBy: updatedAssignmentDetails.createdBy,
   });  
