@@ -145,14 +145,17 @@ module.exports.submitAssignment = async (req, res) => {
       });
     }
 
-    // Check if the deadline has passed
-    const currentTime = new Date();
-    if (currentTime > new Date(assignment.deadline)) {
+    // Check if a submission already exists
+    const existingSubmission = await Submission.findOne({ assignmentId, studentId });
+    if (existingSubmission) {
       return res.status(400).json({
         success: false,
-        message: 'Deadline for this assignment has passed. Submission is not allowed.',
+        message: 'You have already submitted this assignment.',
       });
     }
+
+    const currentTime = new Date();
+    const isLate = currentTime > new Date(assignment.deadline);
 
     const file = req.files.fileupload;
     console.log(file);
@@ -187,14 +190,16 @@ module.exports.submitAssignment = async (req, res) => {
       studentId,
       fileURL: uploadFile.secure_url,
       submissionDate: currentTime,
-      status: 'submitted',
+      status: isLate ? 'late' : 'submitted',
     });
 
     await submission.save();
 
     res.status(201).json({ 
       success: true,
-      message: 'Submission successful', 
+      message: isLate 
+        ? 'Late submission successful. Your submission is marked as late.' 
+        : 'Submission successful.', 
       submission, 
     });
   } catch (error) {
@@ -206,26 +211,47 @@ module.exports.submitAssignment = async (req, res) => {
   }
 };
 
+
+
 module.exports.getAllAssignments = async (req, res) => {
   try {
-    let id  = req.params.id;
+    let id = req.params.id;
     id = new mongoose.Types.ObjectId(id);
+
     // Fetch submissions for the given assignmentId and populate student details (name, rollNo)
     const submissions = await Submission.find({ assignmentId: id })
-      .populate("studentId", "firstName lastName rollNo")  
-      .select("fileURL")  
+      .populate("studentId", "firstName lastName rollNo")
+      .select("fileURL status");
 
-      console.log(`Submissions are: ${submissions}`);
-    res.status(200).json({
-      success: true,
-      message: "Assignment submissions fetched successfully.",
-      submissions: submissions.map(submission => ({
+    console.log(`Submissions are: ${submissions}`);
+
+    // Separate submissions into two arrays based on their status
+    const submittedSubmissions = [];
+    const lateSubmissions = [];
+
+    submissions.forEach((submission) => {
+      const formattedSubmission = {
         studentId: submission.studentId._id,
         firstName: submission.studentId.firstName,
         lastName: submission.studentId.lastName,
-        rollNo: submission.studentId.rollNo,  
-        fileURL: submission.fileURL           
-      })),
+        rollNo: submission.studentId.rollNo,
+        fileURL: submission.fileURL,
+      };
+
+      if (submission.status === "submitted") {
+        submittedSubmissions.push(formattedSubmission);
+      } else if (submission.status === "late") {
+        lateSubmissions.push(formattedSubmission);
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Assignment submissions fetched successfully.",
+      submissions: {
+        submitted: submittedSubmissions,
+        late: lateSubmissions,
+      },
     });
   } catch (err) {
     console.error(err);
