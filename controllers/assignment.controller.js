@@ -10,7 +10,8 @@ require('dotenv').config();
 
 module.exports.createAssignment = async (req, res) => {
   const { id } = req.params; // Subject ID from route parameters
-  const { title, description, deadline, createdBy, minVal, maxVal } = req.body;
+  const { title, description, deadline,  minVal, maxVal } = req.body;
+  // console.log(`created by: ${createdBy}`);
 
   if (!req.files || !req.files.file) {
     return res.status(400).json({
@@ -69,20 +70,20 @@ module.exports.createAssignment = async (req, res) => {
       title,
       description,
       deadline,
-      createdBy,
+      createdBy: subject.teacher_id,
       subjectId: subject._id, // Link assignment to the subject's `_id`
       minVal,
       maxVal,
       fileLink: uploadResults.secure_url,
       filePublicId: uploadResults.public_id,
     });
-
+ 
     const savedAssignment = await newAssignment.save();
 
     // Step 4: Update the Subject's `assignments_id` field
     subject.assignments_id.push(savedAssignment._id.toString());
     await subject.save();
-
+  console.log('bhat saala:',savedAssignment);
     // Step 5: Respond with success
     return res.status(201).json({
       success: true,
