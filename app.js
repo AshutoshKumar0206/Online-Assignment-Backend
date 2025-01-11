@@ -54,17 +54,17 @@ cloudinaryConnect();
 app.use("/assignment", assignmentRoutes);
 
 let users = []; //To store active users and select the users to chat with
-io.on('connection', (socket) => {
-    // console.log('a user connected');
-    //Listen for the 'New Subject' event
-   socket.on('New-Subject', (notification)=>{
-    socket.emit('New-Subject', {message:notification.message});
-   })
+// io.on('connection', (socket) => {
+//     // console.log('a user connected');
+//     //Listen for the 'New Subject' event
+//    socket.on('New-Subject', (notification)=>{
+//     socket.emit('New-Subject', {message:notification.message});
+//    })
   
-    socket.on('disconnect', () => {
-      console.log('user disconnected');
-    });
-});
+//     socket.on('disconnect', () => {
+//       console.log('user disconnected');
+//     });
+// });
 // io.on('connection', (socket) => {
 //     console.log('user connected:', socket.id);
     
