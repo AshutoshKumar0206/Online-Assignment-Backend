@@ -1,4 +1,4 @@
-exports.passwordUpdated = (email, name) => {
+const passwordUpdateTemplate = (email, firstName, lastName) => {
 	return `<!DOCTYPE html>
     <html>
     
@@ -58,7 +58,7 @@ exports.passwordUpdated = (email, name) => {
             //{Put an Anchor tag here and put the link and the image of the website tag}
             <div class="message">Password Update Confirmation</div>
             <div class="body">
-                <p>Hey ${name},</p>
+                <p>Hey ${firstName + " " + lastName},</p>
                 <p>Your password has been successfully updated for the email <span class="highlight">${email}</span>.
                 </p>
                 <p>If you did not request this password change, please contact us immediately to secure your account.</p>
@@ -72,3 +72,4 @@ exports.passwordUpdated = (email, name) => {
     
     </html>`;
 };
+module.exports = passwordUpdateTemplate;

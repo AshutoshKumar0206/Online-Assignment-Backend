@@ -5,7 +5,9 @@ const adminEmail = process.env.ADMIN_EMAIL;
 const adminPassword = process.env.ADMIN_PASSWORD; // Store hashed password in .env file
 const pendingUserModel = require("../models/pendingUser");
 const userModel = require("../models/User");
-
+const approveUserTemplate = require("../mail/approveUserTemplate");
+const mailSender = require("../utils/mailSender");
+require('dotenv').config();
 // Admin Login
 module.exports.adminLogin = async (req, res, next) => {
   try {
@@ -142,7 +144,14 @@ module.exports.approveUser = async (req, res, next) => {
     });
 
     await approvedUser.save();
+    console.log('mai approved hoon:',approvedUser);
     await pendingUserModel.findByIdAndDelete(userId);
+    const mailResponse = await mailSender(
+      approvedUser.email,
+      `${approvedUser.firstName + " " + approvedUser.lastName} approved as ${approvedUser.role}`,
+      approveUserTemplate(approvedUser.firstName, approvedUser.lastName, approvedUser.role)
+    )
+    console.log("mail response:", mailResponse);
 
     res.status(200).json({
       success:true,
