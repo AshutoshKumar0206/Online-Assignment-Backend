@@ -2,7 +2,6 @@ const express = require("express");
 const app= express();
 require("dotenv").config();
 const cors = require("cors");
-// const socketIo = require("socket.io");
 const connectDB = require("./config/mongodb");
 const {cloudinaryConnect } = require("./config/cloudinary");
 const fileUpload = require("express-fileupload");
@@ -11,7 +10,7 @@ const userRoutes = require("./routes/user.routes");
 const adminRoutes = require("./routes/admin.route");
 const assignmentRoutes = require("./routes/assignment.route");
 const PORT = process.env.PORT || 8000;
-
+const { createSubject } = require("./controllers/subject.controller");
 //To initialize a server
 const http = require("http");
 const { Server } = require("socket.io");
@@ -19,7 +18,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors:{
         origin: 'http://localhost:3000',
-        methods: ['GET', 'PUSH'],
+        methods: ['GET', 'POST'],
         credentials: true,
     }
 });
@@ -54,22 +53,18 @@ app.use("/admin", adminRoutes);
 cloudinaryConnect();
 app.use("/assignment", assignmentRoutes);
 
+let users = []; //To store active users and select the users to chat with
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    // console.log('a user connected');
+    //Listen for the 'New Subject' event
+   socket.on('New-Subject', (notification)=>{
+    socket.emit('New-Subject', {message:notification.message});
+   })
   
-    // Listen for the 'New Subject' event
-    socket.on('New Subject', (notification) => {
-      console.log(notification.message);
-      // Send the notification to all connected clients or specific users
-      io.emit('notification', notification);
+    socket.on('disconnect', () => {
+      console.log('user disconnected');
     });
-  
-    // socket.on('disconnect', () => {
-    //   console.log('user disconnected');
-    // });
 });
-
-// const users = {}; //To store active users and select the users to chat with
 // io.on('connection', (socket) => {
 //     console.log('user connected:', socket.id);
     
@@ -100,6 +95,6 @@ io.on('connection', (socket) => {
 // });
 // });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`);
 })
