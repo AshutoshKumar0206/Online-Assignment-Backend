@@ -149,12 +149,6 @@ module.exports.submitAssignment = async (req, res) => {
 
     // Check if a submission already exists
     const existingSubmission = await Submission.findOne({ assignmentId, studentId });
-    if (existingSubmission) {
-      return res.status(400).json({
-        success: false,
-        message: 'You have already submitted this assignment.',
-      });
-    }
 
     const currentTime = new Date();
     const isLate = currentTime > new Date(assignment.deadline);
@@ -186,29 +180,47 @@ module.exports.submitAssignment = async (req, res) => {
     const uploadFile = await uploadDocsToCloudinary(file, folder, formatOptions);
     console.log('Uploading assignment', uploadFile);
 
-    // Create a submission document in the database
-    const submission = new Submission({
-      assignmentId,
-      studentId,
-      fileURL: uploadFile.secure_url,
-      submissionDate: currentTime,
-      status: isLate ? 'late' : 'submitted',
-    });
+    if (existingSubmission) {
+      // Update existing submission with the new file URL
+      existingSubmission.fileURL = uploadFile.secure_url;
+      existingSubmission.submissionDate = currentTime;
+      existingSubmission.status = isLate ? 'late' : 'submitted';
+      await existingSubmission.save();
 
-    await submission.save();
+      // console.log(`existing submission ${existingSubmission}`);
 
-    res.status(201).json({ 
-      success: true,
-      message: isLate 
-        ? 'Late submission successful. Your submission is marked as late.' 
-        : 'Submission successful.', 
-      submission, 
-    });
+      return res.status(200).json({
+        success: true,
+        message: isLate
+          ? 'Late resubmission successful. Your submission is marked as late.'
+          : 'Resubmission successful.',
+        submission: existingSubmission,
+      });
+    } else {
+      // Create a new submission document in the database
+      const submission = new Submission({
+        assignmentId,
+        studentId,
+        fileURL: uploadFile.secure_url,
+        submissionDate: currentTime,
+        status: isLate ? 'late' : 'submitted',
+      });
+
+      await submission.save();
+
+      return res.status(201).json({
+        success: true,
+        message: isLate
+          ? 'Late submission successful. Your submission is marked as late.'
+          : 'Submission successful.',
+        submission,
+      });
+    }
   } catch (error) {
     console.error(error); // Log the error for debugging
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: 'Failed to submit assignment' 
+      message: 'Failed to submit assignment',
     });
   }
 };
@@ -302,3 +314,33 @@ try{
   });
 }
 }
+
+module.exports.getAssignmentSubmission = async (req, res) => {
+  const assignmentId = req.params.assignmentId;
+  const studentId = req.params.studentId;
+
+  try {
+    // Find the submission with the given assignmentId and studentId
+    const submission = await Submission.findOne({ assignmentId, studentId });
+
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        message: 'Submission not found',
+      });
+    }
+
+    // Return the file URL to the frontend
+    res.status(200).json({
+      success: true,
+      message: 'Submission found',
+      fileURL: submission.fileURL,
+    });
+  } catch (error) {
+    console.error(error); // Log the error for debugging
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch submission',
+    });
+  }
+};
