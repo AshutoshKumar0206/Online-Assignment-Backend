@@ -9,7 +9,7 @@ const OTP = require("../models/Otp");
 const emailTemplate = require("../mail/emailVerificationTemplate");
 const resetTemplate = require("../mail/resetPassOtp")
 const mailSender = require("../utils/mailSender");
-const passwordUpdated = require("../mail/PasswordUpdate");
+const passwordUpdateTemplate = require("../mail/PasswordUpdate");
 const Subject = require('../models/Subject');
 const mongoose = require('mongoose');
 const { uploadImageToCloudinary } = require('../utils/imageUploader')
@@ -327,6 +327,13 @@ exports.resetPassword = async (req, res) => {
 			{ password: encryptedPassword },
 			{ new: true }
 		);
+    console.log('details:', userDetails);
+    const mailResponse = await mailSender(
+      userDetails.email,
+      `Password Reset email`,
+      passwordUpdateTemplate(userDetails.email, userDetails.firstName, userDetails.lastName)
+    )
+    console.log("mail response:", mailResponse);
 		res.json({
 			success: true,
 			message: `Password Reset Successful`,
