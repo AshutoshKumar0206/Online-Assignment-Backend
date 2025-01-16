@@ -237,3 +237,44 @@ module.exports.deleteUser = async (req, res, next) => {
     res.status(500).json({ success: false, message: "Error in deleting user" });
   }
 };
+
+
+module.exports.viewUser = async (req, res,next) => {
+  let userId = req.params.id;
+    userId = new mongoose.Types.ObjectId(userId); 
+    
+    try{
+        const user = await userModel.findById(userId).select("-password");
+        console.log('User:', user);
+        if(!user){
+            res.status(404).json({
+              success: false,
+              message: "User not found",
+            })
+        }
+        res.status(200).json({
+          success: true,
+          message: "User Profile",
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          rollNo: user.rollNo,
+          role: user.role,
+          branch: user.branch,
+          semester: user.semester,
+          contact: user.contact,
+          section: user.section,
+          updatedAt: user.updatedAt,
+          exprerience: user.exprerience,
+          employeeId: user.employeeId,
+          image: user.image,
+          subjects: user.subjects,
+        })
+  
+    }catch(err){
+      res.status(500).json({ 
+        success: false,
+        message: "Error fetching User Profile",
+      });
+    }
+}
