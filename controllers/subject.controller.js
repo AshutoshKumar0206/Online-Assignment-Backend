@@ -140,7 +140,7 @@ module.exports.getSubject = async (req, res, next) => {
         .select('_id title') // Only include ID and title
         .lean(); // Return plain JavaScript objects
     }
-    console.log('Assignments:', assignments);
+    // console.log('Assignments:', assignments);
 
     // Construct and return the response
     return res.status(200).json({
