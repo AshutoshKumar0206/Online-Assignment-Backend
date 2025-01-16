@@ -8,7 +8,8 @@ const {
   approveUser,
   deletePendingUser,
   getUser,
-  deleteUser
+  deleteUser,
+  viewUser
 } = require("../controllers/admin.controller");
 
 // Admin Login and Logout Routes
@@ -33,5 +34,8 @@ router.get("/user", verifyAdmin, getUser);
 
 //Route to delete a particular user (only accessible to verified admins)
 router.delete('/new/:id', verifyAdmin, deleteUser);
+
+//Route to get details of a particular user (only accessible to verified admins)
+router.get("/user/:id", verifyAdmin, viewUser);
 
 module.exports = router;
