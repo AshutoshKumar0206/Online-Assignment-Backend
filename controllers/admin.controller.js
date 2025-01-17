@@ -7,6 +7,8 @@ const pendingUserModel = require("../models/pendingUser");
 const userModel = require("../models/User");
 const approveUserTemplate = require("../mail/approveUserTemplate");
 const mailSender = require("../utils/mailSender");
+const mongoose = require('mongoose');
+
 require('dotenv').config();
 // Admin Login
 module.exports.adminLogin = async (req, res, next) => {
