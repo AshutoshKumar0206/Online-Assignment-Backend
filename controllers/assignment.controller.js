@@ -346,3 +346,26 @@ module.exports.getAssignmentSubmission = async (req, res) => {
     });
   }
 };
+
+module.exports.checkPlagiarism = async(req, res, next) => {
+  let assignment_id = req.params.id;
+  assignment_id = new mongoose.Types.ObjectId(assignment_id);
+  try{
+    const submissions = await Submission.find({assignmentId: assignment_id});
+    const fileDetails = submissions.map(submission =>({studentId:submission.studentId, 
+                                                      fileUrl : submission.fileURL}));
+    
+    console.log('hai na file mai:',fileDetails);
+    res.status(200).json({
+      success: true,
+      message: "Submitted files sent to check Plagiarism",
+      fileDetails,
+    });
+
+  } catch(err){
+    res.status(500).json({
+      success: false,
+      message: 'Failed to check Plagiarism',
+    });
+  }
+}
