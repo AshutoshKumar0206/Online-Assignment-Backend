@@ -352,6 +352,13 @@ module.exports.dashboard = async (req, res, next) => {
     const { id } = req.params;
     console.log("ID GOT ");
     console.log(id);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(200).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
     
     const user = await userModel
     .findById(id)
@@ -365,7 +372,7 @@ module.exports.dashboard = async (req, res, next) => {
     console.log("USER GOT ");
     console.log(id);
     if (!user) {
-      return res.status(404).json({
+      return res.status(200).json({
         success: false,
         message: "User not found",
       });
@@ -472,7 +479,7 @@ module.exports.updateProfile = async (req, res, next) => {
     const updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
                                                                    rollNo, contact, 
                                                                   section, branch, 
-                                                                   semester, exprerience,employeeId}, {new: true});
+                                                                   semester, exprerience,employeeId}, {new: true}).select("-password");
     console.log('Updated User:', updatedUser); 
     if(!updatedUser){
       res.status(404).json({
