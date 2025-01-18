@@ -459,6 +459,12 @@ module.exports.Profile = async (req, res, next) => {
 
 module.exports.updateProfile = async (req, res, next) => {
   let userId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(200).json({
+      success: false,
+      message: "Invalid user ID",
+    });
+  }
   userId = new mongoose.Types.ObjectId(userId);
   console.log('body', req.body);
   let email = req.body.email;
@@ -476,10 +482,17 @@ module.exports.updateProfile = async (req, res, next) => {
   // userName = userName.trim().split(' ');
 
   try{
-    const updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
-                                                                   rollNo, contact, 
-                                                                  section, branch, 
-                                                                   semester, exprerience,employeeId}, {new: true}).select("-password");
+    const user = await userModel.findById(userId).select("-password");
+    let updatedUser;
+    if(user.role == "student") {
+      updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
+        rollNo, contact, 
+       section, branch, 
+        semester}, {new: true}).select("-password");
+    } else {
+      updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
+         contact, exprerience,employeeId}, {new: true}).select("-password");
+    }
     console.log('Updated User:', updatedUser); 
     if(!updatedUser){
       res.status(404).json({
