@@ -21,5 +21,5 @@ router.put("/updateassignment/:id", isAuthenticated, assignmentController.update
 
 //route to get the submission of a particular student in the assignment
 router.get("/:assignmentId/:studentId", isAuthenticated, assignmentController.getAssignmentSubmission);
-
+router.post("/checkplagiarism/:id", isAuthenticated, assignmentController.checkPlagiarism);
 module.exports = router;

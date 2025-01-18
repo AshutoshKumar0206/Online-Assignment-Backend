@@ -24,8 +24,12 @@ const io = new Server(server, {
 });
 
 app.use(express.static('public'))
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:8500']
 app.use((req, res, next) =>{
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    const origin = req.headers.origin;
+    if(allowedOrigins.includes(origin)){
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }   
     res.header(
         'Access-Control-Allow-Methods', 
         'Origin, X-Requested-With, Content-Type, Accept'
