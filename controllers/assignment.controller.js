@@ -7,7 +7,7 @@ const upload = multer({ dest: 'uploads/' }); // Temporary storage before cloud u
 const mongoose = require('mongoose');
 const { response } = require('express');
 require('dotenv').config();
-
+const axios = require('axios')
 module.exports.createAssignment = async (req, res) => {
   const { id } = req.params; // Subject ID from route parameters
 
@@ -349,12 +349,21 @@ module.exports.getAssignmentSubmission = async (req, res) => {
 
 module.exports.checkPlagiarism = async(req, res, next) => {
   let assignment_id = req.params.id;
-  assignment_id = new mongoose.Types.ObjectId(assignment_id);
   try{
-    const submissions = await Submission.find({assignmentId: assignment_id});
+    const submissions = await Submission.find({assignmentId: new mongoose.Types.ObjectId(assignment_id)});
     const fileDetails = submissions.map(submission =>({studentId:submission.studentId, 
                                                       fileUrl : submission.fileURL}));
-    
+    try{
+      const mlResponse = await axios.post(`http://localhost:8500/checkplagiarism/${assignment_id}`, 
+      {fileDetails}, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });;
+      console.log('kaise ho bhai ml:', mlResponse.data);
+    }catch(err){
+     console.log(err);
+    }
     console.log('hai na file mai:',fileDetails);
     res.status(200).json({
       success: true,
