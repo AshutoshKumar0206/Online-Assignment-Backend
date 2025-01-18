@@ -459,6 +459,12 @@ module.exports.Profile = async (req, res, next) => {
 
 module.exports.updateProfile = async (req, res, next) => {
   let userId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(200).json({
+      success: false,
+      message: "Invalid user ID",
+    });
+  }
   userId = new mongoose.Types.ObjectId(userId);
   console.log('body', req.body);
   let email = req.body.email;
