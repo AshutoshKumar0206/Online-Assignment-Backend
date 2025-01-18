@@ -476,10 +476,17 @@ module.exports.updateProfile = async (req, res, next) => {
   // userName = userName.trim().split(' ');
 
   try{
-    const updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
-                                                                   rollNo, contact, 
-                                                                  section, branch, 
-                                                                   semester, exprerience,employeeId}, {new: true}).select("-password");
+    const user = await userModel.findById(userId).select("-password");
+    let updatedUser;
+    if(user.role == "student") {
+      updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
+        rollNo, contact, 
+       section, branch, 
+        semester}, {new: true}).select("-password");
+    } else {
+      updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
+         contact, exprerience,employeeId}, {new: true}).select("-password");
+    }
     console.log('Updated User:', updatedUser); 
     if(!updatedUser){
       res.status(404).json({
