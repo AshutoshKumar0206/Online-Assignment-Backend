@@ -354,16 +354,17 @@ module.exports.checkPlagiarism = async(req, res, next) => {
     const fileDetails = submissions.map(submission =>({studentId:submission.studentId, 
                                                       fileUrl : submission.fileURL}));
     try{
-      const mlResponse = await axios.post(`http://localhost:8500/checkplagiarism/${assignment_id}`, 
+      const mlResponse = await axios.post(`http://localhost:8081/checkplagiarism/${assignment_id}`, 
       {fileDetails}, {
         headers: {
             'Content-Type': 'application/json'
         }
-    });;
+    });
       console.log('kaise ho bhai ml:', mlResponse.data);
     }catch(err){
-     console.log(err);
+      console.log('kya yaar fir error:', err.message);
     }
+
     console.log('hai na file mai:',fileDetails);
     res.status(200).json({
       success: true,
@@ -374,7 +375,7 @@ module.exports.checkPlagiarism = async(req, res, next) => {
   } catch(err){
     res.status(500).json({
       success: false,
-      message: 'Failed to check Plagiarism',
+      message: 'Failed to connect to ml model',
     });
   }
 }
