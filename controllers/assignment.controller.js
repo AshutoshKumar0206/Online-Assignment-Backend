@@ -1,4 +1,5 @@
 const Subject = require('../models/Subject'); // Import Subject model
+const userModel = require('../models/User'); // Import User model
 const Assignment = require('../models/Assignment'); // Import Assignment model
 const { uploadDocsToCloudinary } = require('../utils/docsUploader'); // Utility for file upload
 const multer = require('multer');
@@ -354,23 +355,41 @@ module.exports.checkPlagiarism = async(req, res, next) => {
     const fileDetails = submissions.map(submission =>({studentId:submission.studentId, 
                                                       fileUrl : submission.fileURL}));
     try{
-      const mlResponse = await axios.post(`http://localhost:8081/checkplagiarism/${assignment_id}`, 
+      let mlResponse = await axios.post(`http://localhost:8081/checkplagiarism/${assignment_id}`, 
       {fileDetails}, {
         headers: {
             'Content-Type': 'application/json'
         }
     });
-      console.log('kaise ho bhai ml:', mlResponse.data);
+
+      mlResponse.data.results = await Promise.all(mlResponse.data.results.map(async(response) => 
+        {
+          const student1 = await userModel.findById(new mongoose.Types.ObjectId(response.studentId1))
+          .select("firstName lastName").exec()
+          const student2 = await userModel.findById(new mongoose.Types.ObjectId(response.studentId2))
+          .select("firstName lastName").exec()
+
+          return {
+            Assignment1: response.Assignment1,
+            Assignment2: response.Assignment2,
+            CombinedSimilarity: response.CombinedSimilarity,
+            FingerprintSimilarity: response.FingerprintSimilarity,
+            SemanticSimilarity: response.SemanticSimilarity,
+            studentId1: student1 ? `${student1.firstName} ${student1.lastName}` : response.studentId1,
+            studentId2: student2 ? `${student2.firstName} ${student2.lastName}` : response.studentId2,
+          };
+        }));
+        console.log('hello dear ml',mlResponse.data);
+      res.status(200).json({
+        success: true,
+        message: "Submitted files sent to check Plagiarism",
+        mlResponse:mlResponse.data,
+      });
     }catch(err){
       console.log('kya yaar fir error:', err.message);
     }
 
     console.log('hai na file mai:',fileDetails);
-    res.status(200).json({
-      success: true,
-      message: "Submitted files sent to check Plagiarism",
-      fileDetails,
-    });
 
   } catch(err){
     res.status(500).json({
