@@ -7,10 +7,13 @@ const blacklistModel = require("../models/blacklist.model");
 // Configuring dotenv to load environment variables from .env file
 require('dotenv').config();
 module.exports.isAuthenticated = async (req, res, next) => {
+    const userId = req.params.id;
+    console.log(userId);
     try {
       console.log("AUTH REACHED");
-  
+               
       const token = req.headers.authorization?.split(" ")[1];
+      console.log("TOKEN REACHED", token);
       if (!token) {
         return res.status(401).json({ success: false, message: "Token Missing" });
       }
@@ -18,6 +21,9 @@ module.exports.isAuthenticated = async (req, res, next) => {
       let decoded;
       try {
         decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log('hello baby:', decoded);
+       
+        req.user = decoded;
       } catch (error) {
         return res.status(401).json({ success: false, message: "Token is invalid" });
       }
@@ -29,10 +35,11 @@ module.exports.isAuthenticated = async (req, res, next) => {
   
       const user = await userModel.findById(decoded._id);
       if (!user) {
-        return res.status(401).json({ success: false, message: "Unauthorized" });
+        return res.status(401).json({ success: false, message: "Unauthenticated" });
+      } else if(userId !== decoded._id) {
+        return res.status(401).json({ success: false, message: "You are not Authenticated" });
       }
-  
-      req.user = user;
+      
       next();
     } catch (err) {
       console.error(err);

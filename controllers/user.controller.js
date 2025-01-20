@@ -91,7 +91,7 @@ module.exports.signin = async (req, res, next) => {
         message: "Invalid credentials",
       });
     } else if (isPasswordCorrect) {
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
+      const token = jwt.sign({email: user.email, _id: user._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
 
       user.token = token;
       user.password = undefined;
