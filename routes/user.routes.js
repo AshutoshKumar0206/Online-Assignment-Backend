@@ -6,8 +6,8 @@ const { isAuthenticated } = require("../middlewares/auth.middleware"); // Move m
 
 // User Authentication Routes
 router.post("/signup", userController.signup);
-router.post("/signin", isAuthenticated, userController.signin);
-router.post("/logout", isAuthenticated, userController.logout);
+router.post("/signin", userController.signin);
+router.post("/logout/:id", isAuthenticated, userController.logout);
 
 // OTP Routes
 router.post("/sendotp", userController.sendotp);

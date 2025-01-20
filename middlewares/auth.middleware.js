@@ -7,33 +7,34 @@ const blacklistModel = require("../models/blacklist.model");
 // Configuring dotenv to load environment variables from .env file
 require('dotenv').config();
 module.exports.isAuthenticated = async (req, res, next) => {
+  try {
+    console.log("AUTH REACHED");
+    
+    const token = req.headers.authorization?.split(" ")[1];
+    console.log("TOKEN REACHED", token);
+    if (!token) {
+      return res.status(401).json({ success: false, message: "Token Missing" });
+    }
+    
     const userId = req.params.id;
     console.log(userId);
+    let decoded;
     try {
-      console.log("AUTH REACHED");
-               
-      const token = req.headers.authorization?.split(" ")[1];
-      console.log("TOKEN REACHED", token);
-      if (!token) {
-        return res.status(401).json({ success: false, message: "Token Missing" });
-      }
-  
-      let decoded;
-      try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log('hello baby:', decoded);
-       
-        req.user = decoded;
-      } catch (error) {
-        return res.status(401).json({ success: false, message: "Token is invalid" });
-      }
-  
-      const isBlackListed = await blacklistModel.findOne({ token });
-      if (isBlackListed) {
-        return res.status(401).json({ success: false, message: "Unauthorized" });
-      }
-  
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log('hello baby:', decoded);
+      
+      req.user = decoded;
+    } catch (error) {
+      return res.status(401).json({ success: false, message: "Token is invalid" });
+    }
+    
+    const isBlackListed = await blacklistModel.findOne({ token });
+    if (isBlackListed) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    
       const user = await userModel.findById(decoded._id);
+      console.log('user:', user);
       if (!user) {
         return res.status(401).json({ success: false, message: "Unauthenticated" });
       } else if(userId !== decoded._id) {
