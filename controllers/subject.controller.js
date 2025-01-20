@@ -24,9 +24,16 @@ async function generateUniqueSubjectCode() {
 
 module.exports.createSubject = async (req, res) => {
   const { id } = req.params;
+  // const id = req.user.id;
   const { subject_name } = req.body;
-  
+
   try {
+     if(id !== req.user.id){
+        return res.status(404).send({
+          success: false,
+          message: 'User is unauthorized to check other persons data'
+        })
+      }
     // Fetch the user by ID
     const user = await userModel.findById(id);
     console.log('id', id);
@@ -88,11 +95,10 @@ module.exports.createSubject = async (req, res) => {
 
 // Controller for getting all subjects of a user
 module.exports.getSubject = async (req, res, next) => {
-  const { id } = req.params;
-
+  const { id } = req.params; 
   try {
     console.log('id:', id);
-
+    
     // Find the subject using the `subject_id`
     const subject = await Subject.findOne({ subject_id: id });
     console.log('Subject:', subject);

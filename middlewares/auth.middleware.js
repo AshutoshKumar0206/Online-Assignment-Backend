@@ -11,17 +11,13 @@ module.exports.isAuthenticated = async (req, res, next) => {
     console.log("AUTH REACHED");
     
     const token = req.headers.authorization?.split(" ")[1];
-    console.log("TOKEN REACHED", token);
     if (!token) {
       return res.status(401).json({ success: false, message: "Token Missing" });
     }
     
-    const userId = req.params.id;
-    console.log(userId);
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log('hello baby:', decoded);
       
       req.user = decoded;
     } catch (error) {
@@ -33,12 +29,9 @@ module.exports.isAuthenticated = async (req, res, next) => {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
     
-      const user = await userModel.findById(decoded._id);
-      console.log('user:', user);
+      const user = await userModel.findById(decoded.id);
       if (!user) {
         return res.status(401).json({ success: false, message: "Unauthenticated" });
-      } else if(userId !== decoded._id) {
-        return res.status(401).json({ success: false, message: "You are not Authenticated" });
       }
       
       next();
