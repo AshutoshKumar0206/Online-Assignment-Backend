@@ -91,7 +91,7 @@ module.exports.signin = async (req, res, next) => {
         message: "Invalid credentials",
       });
     } else if (isPasswordCorrect) {
-      const token = jwt.sign({email: user.email, _id: user._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
+      const token = jwt.sign({email: user.email, id: user._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
 
       user.token = token;
       user.password = undefined;
@@ -350,10 +350,16 @@ exports.resetPassword = async (req, res) => {
 module.exports.dashboard = async (req, res, next) => {
   try {
     const { id } = req.params;
+    // const id = req.user.id;
+    console.log(req.user)
     console.log("ID GOT ");
     console.log(id);
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if(id !== req.user.id){
+      return res.status(404).send({
+        success: false,
+        message: 'User is unauthorized to check other persons data'
+      })
+    } else if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(200).json({
         success: false,
         message: "Invalid user ID",
@@ -420,9 +426,15 @@ module.exports.dashboard = async (req, res, next) => {
 
 module.exports.Profile = async (req, res, next) => {
   let userId = req.params.id;
-  userId = new mongoose.Types.ObjectId(userId); 
-  
+  console.log(req.user.id)
   try{
+    if(userId !== req.user.id){
+      return res.status(404).send({
+        success: false,
+        message: 'User is unauthorized to check other persons data'
+      })
+    }
+      userId = new mongoose.Types.ObjectId(userId); 
       const user = await userModel.findById(userId).select("-password -subjects");
       console.log('User:', user);
       if(!user){
@@ -459,7 +471,13 @@ module.exports.Profile = async (req, res, next) => {
 
 module.exports.updateProfile = async (req, res, next) => {
   let userId = req.params.id;
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
+
+  if(userId !== req.user.id){
+    return res.status(404).send({
+      success: false,
+      message: 'User is unauthorized to check other persons data'
+    })
+  } if (!mongoose.Types.ObjectId.isValid(userId)) {
     return res.status(200).json({
       success: false,
       message: "Invalid user ID",
@@ -526,8 +544,14 @@ module.exports.updateProfile = async (req, res, next) => {
   }  
 }
 module.exports.updateDisplayPicture = async (req, res, next) => {
+ let userId = req.params.id;
 try{
-  if (!req.files || !req.files.displayPicture) {
+  if(userId !== req.user.id){
+    return res.status(404).send({
+      success: false,
+      message: 'User is unauthorized to check other persons data'
+    })
+  } else if (!req.files || !req.files.displayPicture) {
     return res.status(400).json({
       success: false,
       message: "No file uploaded",
@@ -535,7 +559,6 @@ try{
   }
   
   const displayPicture = req.files.displayPicture;
-  userId = req.params.id;
   userId = new mongoose.Types.ObjectId(userId);
   const image = await uploadImageToCloudinary(
     displayPicture,
