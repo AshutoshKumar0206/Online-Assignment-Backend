@@ -6,8 +6,8 @@ const { isAuthenticated } = require("../middlewares/auth.middleware"); // Move m
 
 // User Authentication Routes
 router.post("/signup", userController.signup);
-router.post("/signin", userController.signin);
-router.post("/logout", userController.logout);
+router.post("/signin", isAuthenticated, userController.signin);
+router.post("/logout", isAuthenticated, userController.logout);
 
 // OTP Routes
 router.post("/sendotp", userController.sendotp);
@@ -18,7 +18,7 @@ router.post("/sendresetotp", userController.sendresetpasswordotp);
 router.post("/resetpassword", userController.resetPassword);
 
 // User Dashboard Route
-router.get("/dashboard/:id", isAuthenticated,userController.dashboard);
+router.get("/dashboard/:id", isAuthenticated, userController.dashboard);
 router.get("/profile/:id", isAuthenticated, userController.Profile);
 router.put("/updateprofile/:id", isAuthenticated, userController.updateProfile);
 router.put("/updatedisplaypicture/:id", isAuthenticated, userController.updateDisplayPicture);
