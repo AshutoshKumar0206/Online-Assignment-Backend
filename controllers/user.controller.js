@@ -206,7 +206,6 @@ module.exports.verifyotp = async (req, res) => {
       message: "OTP verified successfully. User moved to pending list.",
     });
   } catch (err) {
-    console.error(err.message);
     return res.status(500).json({ message: "OTP verification failed" });
   }
 };
@@ -273,7 +272,6 @@ module.exports.sendresetpasswordotp = async (req, res) => {
       "Verification email",
       resetTemplate(otp)
     )
-    console.log("mail response:", mailResponse);
 
     res.status(200).json({
       success: true,
@@ -281,7 +279,6 @@ module.exports.sendresetpasswordotp = async (req, res) => {
       otp,
     });
   } catch (error) {
-    console.log(error.message);
     return res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -315,25 +312,18 @@ exports.resetPassword = async (req, res) => {
 				message: "User is not Registered",
 			});
 		}
-		// if (!(userDetails.resetPasswordExpires > Date.now())) {
-		// 	return res.status(403).json({
-		// 		success: false,
-		// 		message: `Token is Expired, Please Regenerate Your Token`,
-		// 	});
-		// }
+		
 		const encryptedPassword = await bcrypt.hash(password, 10);
 		await userModel.findOneAndUpdate(
 			{ email: email },
 			{ password: encryptedPassword },
 			{ new: true }
 		);
-    console.log('details:', userDetails);
     const mailResponse = await mailSender(
       userDetails.email,
       `Password Reset email`,
       passwordUpdateTemplate(userDetails.email, userDetails.firstName, userDetails.lastName)
     )
-    console.log("mail response:", mailResponse);
 		res.json({
 			success: true,
 			message: `Password Reset Successful`,
@@ -350,10 +340,6 @@ exports.resetPassword = async (req, res) => {
 module.exports.dashboard = async (req, res, next) => {
   try {
     const { id } = req.params;
-    // const id = req.user.id;
-    console.log(req.user)
-    console.log("ID GOT ");
-    console.log(id);
     if(id !== req.user.id){
       return res.status(404).send({
         success: false,
@@ -375,8 +361,6 @@ module.exports.dashboard = async (req, res, next) => {
     })
     .exec();
     
-    console.log("USER GOT ");
-    console.log(id);
     if (!user) {
       return res.status(200).json({
         success: false,
@@ -384,8 +368,6 @@ module.exports.dashboard = async (req, res, next) => {
       });
     }
 
-    console.log(" IN DASHBOARD ");
-    console.log(user);
 
     const subjectDetails = user.subjects.map(subject => ({
       subjectName: subject.subject_name,
@@ -393,8 +375,7 @@ module.exports.dashboard = async (req, res, next) => {
       subjectId: subject.subject_id,
     }));
 
-    console.log("SUB DEETS");
-    console.log(subjectDetails);
+
 
     res.status(200).json({
       user: {
@@ -409,7 +390,6 @@ module.exports.dashboard = async (req, res, next) => {
       success: true,
     });
   } catch (err) {
-    console.error("Error fetching user dashboard:", err);
 
     // Prevent sending another response if headers were already sent
     if (!res.headersSent) {
@@ -419,14 +399,11 @@ module.exports.dashboard = async (req, res, next) => {
       });
     }
 
-    // Optionally pass the error to the next middleware
-    // next(err);
   }
 };
 
 module.exports.Profile = async (req, res, next) => {
   let userId = req.params.id;
-  console.log(req.user.id)
   try{
     if(userId !== req.user.id){
       return res.status(404).send({
@@ -436,7 +413,6 @@ module.exports.Profile = async (req, res, next) => {
     }
       userId = new mongoose.Types.ObjectId(userId); 
       const user = await userModel.findById(userId).select("-password -subjects");
-      console.log('User:', user);
       if(!user){
           res.status(404).json({
             success: false,
@@ -484,9 +460,7 @@ module.exports.updateProfile = async (req, res, next) => {
     });
   }
   userId = new mongoose.Types.ObjectId(userId);
-  console.log('body', req.body);
   let email = req.body.email;
-  // let userName = req.body.profileInput.userName;
   let firstName = req.body.profileInput.firstName;
   let lastName = req.body.profileInput.lastName;
   let rollNo = req.body.profileInput.rollNo;
@@ -497,7 +471,6 @@ module.exports.updateProfile = async (req, res, next) => {
   let exprerience = req.body.profileInput.exprerience;
   let employeeId = req.body.profileInput.employeeId;
 
-  // userName = userName.trim().split(' ');
 
   try{
     const user = await userModel.findById(userId).select("-password");
@@ -511,7 +484,6 @@ module.exports.updateProfile = async (req, res, next) => {
       updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
          contact, exprerience,employeeId}, {new: true}).select("-password");
     }
-    console.log('Updated User:', updatedUser); 
     if(!updatedUser){
       res.status(404).json({
         success: false,
@@ -523,7 +495,6 @@ module.exports.updateProfile = async (req, res, next) => {
       success: true,
       message: "User Profile Updated Successfully",
       email: updatedUser.email,
-      // userName: updatedUser.firstName + " " + updatedUser.lastName,
       firstName: updatedUser.firstName,
       lastName: updatedUser.lastName,
       rollNo: updatedUser.rollNo,
@@ -566,7 +537,6 @@ try{
     1000,
     1000
   )
-  console.log(image);
   const updatedProfile = await userModel.findByIdAndUpdate(
     userId,
     { image: image.secure_url },
@@ -584,65 +554,3 @@ try{
     }) 
 }
 }
-
-// Controller for Changing Password
-// exports.changePassword = async (req, res) => {
-//   try {
-//     const userDetails = await userModel.findById(req.user.id)
-
-//     const { oldPassword, newPassword } = req.body
-
-//     const isPasswordMatch = await bcrypt.compare(
-//       oldPassword,
-//       userDetails.password
-//     )
-//     if (!isPasswordMatch) {
-//       return res
-//         .status(401)
-//         .json({ success: false, message: "The password is incorrect" })
-//     }
-
-//     // Update password
-//     const encryptedPassword = await bcrypt.hash(newPassword, 10)
-//     const updatedUserDetails = await userModel.findByIdAndUpdate(
-//       req.user.id,
-//       { password: encryptedPassword },
-//       { new: true }
-//     )
-
-//     // Send notification email
-//     try {
-//       const emailResponse = await mailSender(
-//         updatedUserDetails.email,
-//         "Password for your account has been updated",
-//         passwordUpdated(
-//           updatedUserDetails.email,
-//           `Password updated successfully for ${updatedUserDetails.firstName} ${updatedUserDetails.lastName}`
-//         )
-//       )
-//       console.log("Email sent successfully:", emailResponse.response)
-//     } catch (error) {
-//       console.error("Error occurred while sending email:", error)
-//       return res.status(500).json({
-//         success: false,
-//         message: "Error occurred while sending email",
-//         error: error.message,
-//       })
-//     }
-
-//     return res.status(200).json({ success: true, message: "Password updated successfully" })
-//   } catch (error) {
-//     console.error("Error occurred while updating password:", error)
-//     return res.status(500).json({
-//       success: false,
-//       message: "Error occurred while updating password",
-//       error: error.message,
-//     })
-//   }
-// }
-
-
-
-
-
-

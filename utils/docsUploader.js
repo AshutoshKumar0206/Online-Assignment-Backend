@@ -19,11 +19,8 @@ exports.uploadDocsToCloudinary = async (file, folder, formatOptions = {}) => {
   }
   const fileName = path.basename(file.name, path.extname(file.name)); // Get the base name without extension
   let publicIdWithExtension;
-  // if(fileExtension !== 'pdf') {
    publicIdWithExtension = `${fileName}.${fileExtension}`;
-  // } else{
-    // publicIdWithExtension = fileName;
-  // }
+  
   const options = {
     folder,
     resource_type: 'raw', // Needed for non-image files
