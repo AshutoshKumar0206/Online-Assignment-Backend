@@ -28,9 +28,6 @@ module.exports.adminLogin = async (req, res, next) => {
         message: "Invalid email",
       });
     }
-    // const hashedPassword = await bcrypt.hash(password, 10);
-    // const adminHashedPassword = await bcrypt.hash(adminPassword, 10);
-    // const isPasswordCorrect = await bcrypt.compare(hashedPassword, adminHashedPassword);
 
     if (password !== adminPassword) {
       return res.status(401).json({
@@ -39,18 +36,12 @@ module.exports.adminLogin = async (req, res, next) => {
       });
     }
     const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    // const token = crypto.randomBytes(20).toString("hex");
     
     const options = {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       httpOnly: true,
     };
 
-    // res.cookie("token", token, options).status(200).json({
-    //   success: true,
-    //   token,
-    //   message: "Admin login successful.",
-    // });
 
     // Fetch pending users
     const pendingUsers = await pendingUserModel.find({}, { password: 0 });
@@ -146,14 +137,12 @@ module.exports.approveUser = async (req, res, next) => {
     });
 
     await approvedUser.save();
-    console.log('mai approved hoon:',approvedUser);
     await pendingUserModel.findByIdAndDelete(userId);
     const mailResponse = await mailSender(
       approvedUser.email,
       `${approvedUser.firstName + " " + approvedUser.lastName} approved as ${approvedUser.role}`,
       approveUserTemplate(approvedUser.firstName, approvedUser.lastName, approvedUser.role)
     )
-    console.log("mail response:", mailResponse);
 
     res.status(200).json({
       success:true,
@@ -181,7 +170,6 @@ module.exports.deletePendingUser = async(req, res, next) => {
       });
     }
   } catch (error) {
-    console.log(err);
     res.status(500).json({ 
       message: "Error in Deleting User"
     });
@@ -212,7 +200,6 @@ module.exports.getUser = async (req, res, next) => {
       teachers,
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Error in Fetching Users detail" });
   }
 };
@@ -235,7 +222,6 @@ module.exports.deleteUser = async (req, res, next) => {
       message: "User deleted successfully",
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ success: false, message: "Error in deleting user" });
   }
 };
@@ -247,7 +233,6 @@ module.exports.viewUser = async (req, res,next) => {
     
     try{
         const user = await userModel.findById(userId).select("-password");
-        console.log('User:', user);
         if(!user){
             res.status(404).json({
               success: false,

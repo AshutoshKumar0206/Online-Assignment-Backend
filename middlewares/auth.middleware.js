@@ -1,14 +1,11 @@
 const userModel = require("../models/User");
 const jwt = require("jsonwebtoken");
 const blacklistModel = require("../models/blacklist.model");
-// const cookieParser = require("cookie-parser");
-// app.use(cookieParser());
 
 // Configuring dotenv to load environment variables from .env file
 require('dotenv').config();
 module.exports.isAuthenticated = async (req, res, next) => {
   try {
-    console.log("AUTH REACHED");
     
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
@@ -36,7 +33,6 @@ module.exports.isAuthenticated = async (req, res, next) => {
       
       next();
     } catch (err) {
-      console.error(err);
       return res.status(500).json({
         success: false,
         message: "Something went wrong while validating the token",
@@ -67,9 +63,6 @@ module.exports.isStudent = async (req, res, next) => {
 module.exports.isInstructor = async (req, res, next) => {
 	try {
 		const userDetails = await User.findOne({ email: req.user.email });
-		console.log(userDetails);
-
-		console.log(userDetails.role);
 
 		if (userDetails.role !== "Teacher") {
 			return res.status(401).json({

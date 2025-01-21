@@ -36,9 +36,6 @@ module.exports.createSubject = async (req, res) => {
       }
     // Fetch the user by ID
     const user = await userModel.findById(id);
-    console.log('id', id);
-    console.log(`subjectName: ${subject_name}`);
-    console.log('User', user);
 
     // Check if the user exists
     if (!user) {
@@ -62,11 +59,9 @@ module.exports.createSubject = async (req, res) => {
       subject_code: subject_code, // Add the generated subject_code
     });
 
-    console.log('New Subject', newSubject);
 
     // Save the new Subject to the database
     const savedSubject = await newSubject.save();
-    console.log('A new ID', savedSubject.id);
 
     // Update the teacher's subjects array
     const userSubjects = await userModel.findByIdAndUpdate(
@@ -74,7 +69,6 @@ module.exports.createSubject = async (req, res) => {
       { $push: { subjects: savedSubject.id } }, 
       { new: true }
     );
-    console.log('Updated User', userSubjects.id === id ? userSubjects : null);
 
     // Return the response
     return res.status(201).json({
@@ -83,7 +77,6 @@ module.exports.createSubject = async (req, res) => {
       message: 'Subject created successfully.',
     });
   } catch (err) {
-    console.error('Error creating subject:', err);
     return res.status(500).json({
       error: err.message,
       success: false,
@@ -97,11 +90,9 @@ module.exports.createSubject = async (req, res) => {
 module.exports.getSubject = async (req, res, next) => {
   const { id } = req.params; 
   try {
-    console.log('id:', id);
     
     // Find the subject using the `subject_id`
     const subject = await Subject.findOne({ subject_id: id });
-    console.log('Subject:', subject);
 
     // Check if the subject exists
     if (!subject) {
@@ -111,10 +102,8 @@ module.exports.getSubject = async (req, res, next) => {
       });
     }
 
-    console.log('Found subject:', subject);
 
     const teacherId = subject.teacher_id;
-    console.log('Teacher ID:', teacherId);
 
     // Check if the teacher ID exists
     if (!teacherId) {
@@ -126,7 +115,6 @@ module.exports.getSubject = async (req, res, next) => {
 
     // Fetch teacher details, excluding the password
     const teacher = await userModel.findById(teacherId).select('-password');
-    console.log('Teacher:', teacher);
 
     // Check if the teacher exists
     if (!teacher) {
@@ -136,9 +124,6 @@ module.exports.getSubject = async (req, res, next) => {
       });
     }
 
-    // Log statements for debugging (preserving original logging)
-    console.log('User hai mai kya kr lega bei:', subject);
-    console.log('Updated User details fetched:', teacher.firstName, teacher.lastName);
 
     let assignments = [];
     if (subject.assignments_id && subject.assignments_id.length > 0) {
@@ -146,7 +131,6 @@ module.exports.getSubject = async (req, res, next) => {
         .select('_id title') // Only include ID and title
         .lean(); // Return plain JavaScript objects
     }
-    // console.log('Assignments:', assignments);
 
     // Construct and return the response
     return res.status(200).json({
@@ -161,7 +145,6 @@ module.exports.getSubject = async (req, res, next) => {
       assignments: assignments.length > 0 ? assignments : [], // Include associated assignments if applicable
     });
   } catch (err) {
-    console.error('Error fetching subject:', err);
     next(err);
   }
 };
@@ -170,14 +153,12 @@ module.exports.getSubject = async (req, res, next) => {
 module.exports.addStudent = async (req, res, next) => {
   const { id } = req.params;//fetch subjectId from url
   const emails  = req.body.email;
-  console.log('Emails:', emails);
   try{
     let subjectId = await Subject.findOne({subject_id: id});
 
     subjectId = subjectId._id; 
     if(!emails){
       let studentsAdded = await Subject.findById(subjectId).populate({ path: 'students_id', select: '-password -subjects',});
-      console.log('Students are there:', studentsAdded.students_id); 
       return res.status(200).json({ 
         success: true, 
         message: 'Existing students returned.' ,
@@ -191,12 +172,10 @@ module.exports.addStudent = async (req, res, next) => {
      for(const email of listOfEmails){
       // Check if the email is empty
       if (!email) {
-        console.log('Skipped empty email');
         continue; // Skip further processing for this email
       }
       
        let student = await userModel.findOne({email});
-       console.log('Student hu bei kya kr lega:', student); 
        if(student && student.role === 'student'){
         let studentId = await Subject.findByIdAndUpdate(
           subjectId, { $addToSet: { students_id: student._id.toString() } },{ new: true }
@@ -204,15 +183,12 @@ module.exports.addStudent = async (req, res, next) => {
         let subjects = await userModel.findByIdAndUpdate(
           student._id, { $addToSet: { subjects: subjectId.toString() } },{ new: true }
         );
-         console.log('Student Added:', studentId); 
         } else{
           let notStudent = notFoundStudents.push(email);
-          console.log('Not Found Student:', notStudent);
         }
       }
       
       let studentsAdded = await Subject.findById(subjectId).populate({ path: 'students_id', select: '-password -subjects',});
-      console.log('Students are there:', studentsAdded.students_id); 
     res.status(200).json({ 
       success: true,
       message: "Students added successfully.",
@@ -230,27 +206,18 @@ module.exports.removeStudent = async (req, res, next) => {
   let subjectId = req.params.id;
   let studentId = req.body.studentId;
   const email = req.body.studentEmail;
-  console.log('Student ID:', studentId);
-  console.log('Subject ID:', subjectId);
-  console.log('Email:', email);
   try{
     // Remove studentId from subject's studentIds array
-    console.log(subjectId, " in remove ", studentId);
-    // let subject = await Subject.findOne({subject_id : subjectId});
-    // console.log('Before update:', subject);
     let subject = await Subject.findOne({subject_id : subjectId});
     
     await Subject.findOneAndUpdate({subject_id : subjectId}, {
       $pull: { students_id: studentId },
     });
     subjectId = subject._id;
-      // subject = await Subject.findOne({subject_id : subjectId});
-      // console.log('after update:', subject);
       // Remove subjectId from student's subjects array
       await userModel.findOneAndUpdate({email : email}, {
           $pull: { subjects: subjectId.toString() },
       });
-      console.log('Student:', subject); 
 
       res.status(200).send({ 
         success: true, 
@@ -258,7 +225,6 @@ module.exports.removeStudent = async (req, res, next) => {
       });
 
   } catch(err){
-    console.log(err);
     res.status(500).send({ 
       success: false, 
       message: 'Internal Server Error', 

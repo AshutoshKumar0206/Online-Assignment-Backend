@@ -63,7 +63,6 @@ module.exports.createAssignment = async (req, res) => {
       resourceType: 'auto',
     };
     const uploadResults = await uploadDocsToCloudinary(file, folder, formatOptions);
-    console.log('Uploaded file:', uploadResults);
     const publicId = uploadResults.public_id;
     const fileUrl = uploadResults.secure_url; 
 
@@ -86,7 +85,6 @@ module.exports.createAssignment = async (req, res) => {
     // Step 4: Update the Subject's `assignments_id` field
     subject.assignments_id.push(savedAssignment._id.toString());
     await subject.save();
-  console.log('bhat saala:',savedAssignment);
     // Step 5: Respond with success
     return res.status(201).json({
       success: true,
@@ -94,7 +92,6 @@ module.exports.createAssignment = async (req, res) => {
       assignment: savedAssignment,
     });
   } catch (err) {
-    console.error('Error creating assignment:', err);
     return res.status(500).json({
       success: false,
       message: 'Internal Server Error',
@@ -129,7 +126,6 @@ module.exports.getAssignmentDetails = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching assignment details:', error);
     next(error); // Pass the error to the next middleware for handling
   }
 };
@@ -157,7 +153,6 @@ module.exports.submitAssignment = async (req, res) => {
     const isLate = currentTime > new Date(assignment.deadline);
 
     const file = req.files.fileupload;
-    console.log(file);
 
     // Check file type
     const allowedMimeTypes = [
@@ -181,7 +176,6 @@ module.exports.submitAssignment = async (req, res) => {
       resourceType: 'auto',
     };
     const uploadFile = await uploadDocsToCloudinary(file, folder, formatOptions);
-    console.log('Uploading assignment', uploadFile);
 
     if (existingSubmission) {
       // Update existing submission with the new file URL
@@ -220,7 +214,6 @@ module.exports.submitAssignment = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error(error); // Log the error for debugging
     res.status(500).json({
       success: false,
       message: 'Failed to submit assignment',
@@ -240,7 +233,6 @@ module.exports.getAllAssignments = async (req, res) => {
       .populate("studentId", "firstName lastName rollNo")
       .select("fileURL status");
 
-    console.log(`Submissions are: ${submissions}`);
 
     // Separate submissions into two arrays based on their status
     const submittedSubmissions = [];
@@ -271,7 +263,6 @@ module.exports.getAllAssignments = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: "Failed to fetch submissions" });
   }
 };
@@ -279,19 +270,16 @@ module.exports.getAllAssignments = async (req, res) => {
 module.exports.updateAssignment = async (req, res, next) => {
 let assignmentId = req.params.id;
 assignmentId = new mongoose.Types.ObjectId(assignmentId);
-console.log(req.body, " body ");
 let title = req.body.assignment.title;
 let description = req.body.assignment.description;
 let deadline = req.body.assignment.deadline;
 let maxVal = req.body.assignment.maxVal;
 let minVal = req.body.assignment.minVal;
-console.log(title, description, deadline, maxVal, minVal);
 try{
   const updatedAssignmentDetails = await Assignment.findByIdAndUpdate(assignmentId, {title: title, description : description, 
                                                                                       deadline: deadline, minVal : minVal, maxVal: maxVal}, 
                                                                                         {new : true});
   
-    console.log('After Updation:', updatedAssignmentDetails);
     if(!updatedAssignmentDetails){
       res.status(404).json({
         success: false,
@@ -340,7 +328,6 @@ module.exports.getAssignmentSubmission = async (req, res) => {
       fileURL: submission.fileURL,
     });
   } catch (error) {
-    console.error(error); // Log the error for debugging
     res.status(500).json({
       success: false,
       message: 'Failed to fetch submission',
@@ -389,7 +376,6 @@ module.exports.checkPlagiarism = async (req, res, next) => {
         { headers: { 'Content-Type': 'application/json' } }
       );
     } catch (err) {
-      console.error('Error connecting to ML model:', err.message);
       return res.status(500).json({
         success: false,
         message: 'Failed to connect to ML model',
@@ -437,7 +423,6 @@ module.exports.checkPlagiarism = async (req, res, next) => {
       mlResponse: { ...mlResponse.data, results },
     });
   } catch (err) {
-    console.error('Error:', err.message);
     return res.status(500).json({
       success: false,
       message: 'Internal server error',
