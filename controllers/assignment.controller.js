@@ -404,14 +404,16 @@ module.exports.checkPlagiarism = async (req, res, next) => {
             ? {
                 name: `${student1.firstName} ${student1.lastName}`,
                 fileUrl: fileUrlMap[response.studentId1],
+                id: response.studentId1,
               }
-            : { name: response.studentId1, fileUrl: null },
+            : { name: response.studentId1, fileUrl: null, id: response.studentId1},
           studentId2: student2
             ? {
                 name: `${student2.firstName} ${student2.lastName}`,
                 fileUrl: fileUrlMap[response.studentId2],
+                id: response.studentId2,
               }
-            : { name: response.studentId2, fileUrl: null },
+            : { name: response.studentId2, fileUrl: null, id: response.studentId2},
         };
       })
     );
