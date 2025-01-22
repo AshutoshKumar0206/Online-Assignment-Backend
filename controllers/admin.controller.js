@@ -6,7 +6,7 @@ const adminPassword = process.env.ADMIN_PASSWORD; // Store hashed password in .e
 const pendingUserModel = require("../models/pendingUser");
 const userModel = require("../models/User");
 const approveUserTemplate = require("../mail/approveUserTemplate");
-const mailSender = require("../utils/mailSender");
+const mailSender = require("../utils/mailsender");
 const mongoose = require('mongoose');
 
 require('dotenv').config();
