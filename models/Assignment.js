@@ -40,6 +40,10 @@ const AssignmentSchema = new mongoose.Schema({
   filePublicId: {
     type: String, // Cloudinary's public ID for file management
   },
+  open: {
+    type: Boolean,
+    default: true,
+  }
 });
 
 module.exports = mongoose.model('Assignment', AssignmentSchema);
