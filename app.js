@@ -6,10 +6,10 @@ const connectDB = require("./config/mongodb");
 const {cloudinaryConnect } = require("./config/cloudinary");
 const fileUpload = require("express-fileupload");
 const indexRoutes = require("./routes/index.route");
-const userRoutes = require("./routes/user.routes");
+const userRoutes = require("./routes/user.route");
 const adminRoutes = require("./routes/admin.route");
 const assignmentRoutes = require("./routes/assignment.route");
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 4000;
 const { createSubject } = require("./controllers/subject.controller");
 //To initialize a server
 const http = require("http");
