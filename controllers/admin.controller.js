@@ -5,6 +5,8 @@ const adminEmail = process.env.ADMIN_EMAIL;
 const adminPassword = process.env.ADMIN_PASSWORD; // Store hashed password in .env file
 const pendingUserModel = require("../models/pendingUser");
 const userModel = require("../models/User");
+const Subject = require("../models/Subject");
+const Submission = require("../models/Submission");
 const approveUserTemplate = require("../mail/approveUserTemplate");
 const mailSender = require("../utils/mailsender");
 const mongoose = require('mongoose');
@@ -252,6 +254,7 @@ console.log("assignment deleted");
       message: "User deleted successfully",
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ success: false, message: "Error in deleting user" });
   }
 };
