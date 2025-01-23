@@ -5,6 +5,8 @@ const adminEmail = process.env.ADMIN_EMAIL;
 const adminPassword = process.env.ADMIN_PASSWORD; // Store hashed password in .env file
 const pendingUserModel = require("../models/pendingUser");
 const userModel = require("../models/User");
+const Subject = require("../models/Subject");
+const Submission = require("../models/Submission");
 const approveUserTemplate = require("../mail/approveUserTemplate");
 const mailSender = require("../utils/mailsender");
 const mongoose = require('mongoose');
@@ -209,19 +211,50 @@ module.exports.getUser = async (req, res, next) => {
 module.exports.deleteUser = async (req, res, next) => {
   try {
     const userId = req.params.id;
+    console.log("userId", userId);
 
-    // Find and delete the user by ID
-    const deletedUser = await userModel.findByIdAndDelete(userId);
+    // Find the user by ID
+    const user = await userModel.findById(userId);
 
-    if (!deletedUser) {
+    if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
+    console.log("user", user);
+
+    // Remove the user from all subjects they are enrolled in
+    await Subject.updateMany(
+      { students_id: userId },
+      { $pull: { students_id: userId } }
+    );
+    console.log("subjects found");
+
+    // If the user is a teacher, delete all subjects created by them
+    if (user.role === 'teacher') {
+      const subjects = await Subject.find({ teacher_id: userId });
+      console.log("subject deletion in progress");
+
+      for (const subject of subjects) {
+        // Delete all assignments and submissions related to the subject
+        await Assignment.deleteMany({ subjectId: subject._id });
+        await Submission.deleteMany({ assignmentId: { $in: subject.assignments_id } });
+console.log("assignment deleted");
+        // Delete the subject
+        await Subject.findByIdAndDelete(subject._id);
+      }
+    }
+
+    // Delete all assignments submitted by the user
+    await Submission.deleteMany({ studentId: userId });
+
+    // Delete the user
+    const deletedUser = await userModel.findByIdAndDelete(userId);
 
     res.status(200).json({
       success: true,
       message: "User deleted successfully",
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ success: false, message: "Error in deleting user" });
   }
 };
