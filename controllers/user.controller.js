@@ -402,6 +402,35 @@ module.exports.dashboard = async (req, res, next) => {
   }
 };
 
+module.exports.getProfile = async (req, res, next) => {
+  let userId = req.params.id;
+  
+  // console.log(userId);
+  try {
+    userId = new mongoose.Types.ObjectId(userId);
+
+    const user = await userModel.findById(userId).select("firstName lastName image");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User Profile",
+      name: `${user.firstName} ${user.lastName}`,
+      image: user.image,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching User Profile",
+    });
+  }
+};
+
 module.exports.Profile = async (req, res, next) => {
   let userId = req.params.id;
   try{
