@@ -17,7 +17,7 @@ const { app, server } =require( "./lib/socket.js");
 
 
 app.use(express.static('public'))
-const allowedOrigins = ['https://online-assignment-frontend-pi.vercel.app/', 'http://localhost:3000', 'http://localhost:8081']
+const allowedOrigins = ['https://online-assignment-frontend-pi.vercel.app', 'http://localhost:3000', 'http://localhost:8081']
 app.use((req, res, next) =>{
     const origin = req.headers.origin;
     if(allowedOrigins.includes(origin)){
@@ -51,7 +51,7 @@ app.use("/admin", adminRoutes);
 cloudinaryConnect();
 app.use("/assignment", assignmentRoutes);
 
-let users = []; //To store active users and select the users to chat with
+// let users = []; //To store active users and select the users to chat with
 // io.on('connection', (socket) => {
 //     // console.log('a user connected');
 //     //Listen for the 'New Subject' event

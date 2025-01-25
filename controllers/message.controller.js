@@ -5,13 +5,13 @@ const { getReceiverSocketId, io } =require("../lib/socket.js");
 
 module.exports.getMessages = async (req, res) => {
     try {
-      const { id: userToChatId } = req.params;
-      const myId = req.user._id;
-  
+      const id = req.params.id
+      const myId = req.user.id;
+      
       const messages = await Message.find({
         $or: [
-          { senderId: myId, receiverId: userToChatId },
-          { senderId: userToChatId, receiverId: myId },
+          { senderId: myId, receiverId: id },
+          { senderId: id, receiverId: myId },
         ],
       });
   
@@ -27,10 +27,10 @@ module.exports.sendMessage = async (req, res) => {
       const { text, image } = req.body;
       const {  id:receiverId } = req.params;
       const senderId = req.body.senderId;
-    //   console.log("receiverId");
-    //   console.log(receiverId);
-    //   console.log(`senderId: ${senderId}`);
-  
+      console.log("receiverId");
+      console.log(receiverId);
+      console.log(`senderId: ${senderId}`);
+      
       let imageUrl;
       if (image) {
         // Upload base64 image to cloudinary
