@@ -17,7 +17,7 @@ const { app, server } =require( "./lib/socket.js");
 
 
 app.use(express.static('public'))
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:8081']
+const allowedOrigins = ['https://online-assignment-frontend-pi.vercel.app/', 'http://localhost:3000', 'http://localhost:8081']
 app.use((req, res, next) =>{
     const origin = req.headers.origin;
     if(allowedOrigins.includes(origin)){
