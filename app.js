@@ -1,5 +1,5 @@
 const express = require("express");
-const app= express();
+// const app= express();
 require("dotenv").config();
 const cors = require("cors");
 const connectDB = require("./config/mongodb");
@@ -8,20 +8,13 @@ const fileUpload = require("express-fileupload");
 const indexRoutes = require("./routes/index.route");
 const userRoutes = require("./routes/user.route");
 const adminRoutes = require("./routes/admin.route");
+const messageRoutes = require("./routes/message.route.js")
 const assignmentRoutes = require("./routes/assignment.route");
 const PORT = process.env.PORT || 4000;
 const { createSubject } = require("./controllers/subject.controller");
+const { app, server } =require( "./lib/socket.js");
 //To initialize a server
-const http = require("http");
-const { Server } = require("socket.io");
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors:{
-        origin: 'http://localhost:3000',
-        methods: ['GET', 'POST'],
-        credentials: true,
-    }
-});
+
 
 app.use(express.static('public'))
 const allowedOrigins = ['http://localhost:3000', 'http://localhost:8081']
@@ -52,6 +45,7 @@ app.use(
 )
 app.use("/", indexRoutes);
 app.use("/user", userRoutes);
+app.use("/message", messageRoutes);
 app.use("/admin", adminRoutes);
 //cloudinary connection
 cloudinaryConnect();
