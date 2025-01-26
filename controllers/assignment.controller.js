@@ -1,3 +1,4 @@
+require('dotenv').config();
 const Subject = require('../models/Subject'); // Import Subject model
 const userModel = require('../models/User'); // Import User model
 const Assignment = require('../models/Assignment'); // Import Assignment model
@@ -7,8 +8,9 @@ const Submission = require('../models/Submission');
 const upload = multer({ dest: 'uploads/' }); // Temporary storage before cloud upload
 const mongoose = require('mongoose');
 const { response } = require('express');
-require('dotenv').config();
+// const mlUrl = process.env.NODE_URL || "http://localhost:8081"
 const axios = require('axios')
+
 module.exports.createAssignment = async (req, res) => {
   const { id } = req.params; // Subject ID from route parameters
 
@@ -337,7 +339,9 @@ module.exports.getAssignmentSubmission = async (req, res) => {
 
 module.exports.checkPlagiarism = async (req, res, next) => {
   const assignment_id = req.params.id;
-
+  const mlUrl = req.hostname === 'localhost'
+  ? "http://localhost:8081" : process.env.NODE_URL;
+  // console.log(assignment_id);
   if (!mongoose.Types.ObjectId.isValid(assignment_id)) {
     return res.status(400).json({
       success: false,
@@ -371,7 +375,7 @@ module.exports.checkPlagiarism = async (req, res, next) => {
     let mlResponse;
     try {
       mlResponse = await axios.post(
-        `http://localhost:8081/checkplagiarism/${assignment_id}`,
+        `${mlUrl}/upload`,
         { fileDetails },
         { headers: { 'Content-Type': 'application/json' } }
       );
