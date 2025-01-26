@@ -370,7 +370,7 @@ module.exports.checkPlagiarism = async (req, res, next) => {
       studentId: submission.studentId,
       fileUrl: submission.fileURL,
     }));
-
+    console.log(fileDetails);
     // Send file details to ML model
     let mlResponse;
     try {
@@ -380,12 +380,13 @@ module.exports.checkPlagiarism = async (req, res, next) => {
         { headers: { 'Content-Type': 'application/json' } }
       );
     } catch (err) {
+      console.log(err);
       return res.status(500).json({
         success: false,
         message: 'Failed to connect to ML model',
       });
     }
-
+    console.log(mlResponse.data);
     // Process ML response
     const results = await Promise.all(
       mlResponse.data.results.map(async (response) => {
