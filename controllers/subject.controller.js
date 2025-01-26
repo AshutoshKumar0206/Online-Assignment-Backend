@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Subject = require('../models/Subject'); // Ensure this path points to your Subject model
 const userModel = require('../models/User'); // Ensure this path points to your User model
 const assignmentModel = require("../models/Assignment");
+const submissionModel = require("../models/Submission")
 const fileUpload = require('express-fileupload');
 const { uploadDocsToCloudinary } = require('../utils/docsUploader');
 
