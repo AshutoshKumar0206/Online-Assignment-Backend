@@ -311,6 +311,18 @@ exports.resetPassword = async (req, res) => {
       return res.status(401).json({ message: "Invalid OTP." });
     }
 
+    // Password validation regex
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*])[A-Za-z\d@#$%^&*]{8,}$/;
+
+    // Check if password meets the criteria
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character (@, #, $, %, ^, &, *).",
+      });
+    }
+
 		if (confirmPassword !== password) {
 			return res.json({
 				success: false,
