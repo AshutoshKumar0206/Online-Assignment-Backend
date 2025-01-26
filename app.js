@@ -8,8 +8,9 @@ const fileUpload = require("express-fileupload");
 const indexRoutes = require("./routes/index.route");
 const userRoutes = require("./routes/user.route");
 const adminRoutes = require("./routes/admin.route");
-const messageRoutes = require("./routes/message.route.js")
+const messageRoutes = require("./routes/message.route.js");
 const assignmentRoutes = require("./routes/assignment.route");
+const subjectRoutes = require("./routes/subject.route.js");
 const PORT = process.env.PORT || 4000;
 const { createSubject } = require("./controllers/subject.controller");
 const { app, server } =require( "./lib/socket.js");
@@ -50,6 +51,7 @@ app.use("/admin", adminRoutes);
 //cloudinary connection
 cloudinaryConnect();
 app.use("/assignment", assignmentRoutes);
+app.use("/subject", subjectRoutes);
 
 // let users = []; //To store active users and select the users to chat with
 // io.on('connection', (socket) => {

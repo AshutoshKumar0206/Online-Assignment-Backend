@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Subject = require('../models/Subject'); // Ensure this path points to your Subject model
 const userModel = require('../models/User'); // Ensure this path points to your User model
 const assignmentModel = require("../models/Assignment");
+const submissionModel = require("../models/Submission")
 const fileUpload = require('express-fileupload');
 const { uploadDocsToCloudinary } = require('../utils/docsUploader');
 
@@ -288,5 +289,58 @@ module.exports.joinSubject = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+
+module.exports.deleteSubject = async (req, res) => {
+  const { id } = req.params; // Subject ID
+
+  try {
+    // Find the subject by subject_id
+    const subject = await Subject.findOne({ subject_id: id });
+    if (!subject) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subject not found.',
+      });
+    }
+
+    // Remove subject from students' subject list
+    await userModel.updateMany(
+      { subjects: subject._id.toString() },
+      { $pull: { subjects: subject._id.toString() } }
+    );
+
+    // Delete all assignments associated with the subject
+    const assignments = subject.assignments_id || [];
+    if (assignments.length > 0) {
+      // Delete all submissions related to these assignments
+      await submissionModel.deleteMany({ assignment_id: { $in: assignments } });
+      // Delete the assignments themselves
+      await assignmentModel.deleteMany({ _id: { $in: assignments } });
+    }
+
+    // Remove subject from teacher's subject list
+    await userModel.updateOne(
+      { role: 'teacher', subjects: subject._id.toString() },
+      { $pull: { subjects: subject._id.toString() } }
+    );
+    
+
+    // Delete the subject itself
+    await Subject.findByIdAndDelete(subject._id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Subject and its related data deleted successfully.',
+    });
+  } catch (error) {
+    console.error('Error deleting subject:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+      error: error.message,
+    });
   }
 };
