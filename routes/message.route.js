@@ -11,5 +11,6 @@ const { isAuthenticated } = require("../middlewares/auth.middleware");
 
 router.post("/send/:id", isAuthenticated, messageController.sendMessage);
 router.get("/get/:id",isAuthenticated, messageController.getMessages);
+router.delete("/delete/:id", isAuthenticated, messageController.deleteMessage)
 
 module.exports = router;
