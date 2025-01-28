@@ -359,13 +359,23 @@ module.exports.checkPlagiarism = async (req, res, next) => {
         message: 'No submissions found for this assignment',
       });
     }
-
+    console.log(submissions);
+    let late=0, submitted=0, notSubmitted=0;
+    submissions.map((submission) => {
+      if(submission.status === 'submitted') {
+          submitted+=1;
+      } else if(submission.status === 'late') {
+          late+=1;       
+      } else {
+          notSubmitted = submissions.length - submitted - late;
+      }
+    })
     // Create a mapping of studentId to fileUrl
     const fileUrlMap = submissions.reduce((map, submission) => {
       map[submission.studentId] = submission.fileURL;
       return map;
     }, {});
-
+    
     // Prepare file details
     const fileDetails = submissions.map((submission) => ({
       studentId: submission.studentId,
@@ -427,6 +437,9 @@ module.exports.checkPlagiarism = async (req, res, next) => {
       success: true,
       message: 'Submitted files sent to check Plagiarism',
       mlResponse: { ...mlResponse.data, results },
+      submitted,
+      late,
+      notSubmitted,
     });
   } catch (err) {
     return res.status(500).json({
