@@ -20,10 +20,12 @@ const SubmissionSchema = new mongoose.Schema({
       default: Date.now,
     },
     grade: {
-      type: String,
+      type: Number,
+      default: 0,
     },
     feedback: {
       type: String,
+      default:"",
     },
     status: {
       type: String,
