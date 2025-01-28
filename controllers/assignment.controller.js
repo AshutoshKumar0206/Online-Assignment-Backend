@@ -339,8 +339,9 @@ module.exports.getAssignmentSubmission = async (req, res) => {
 
 module.exports.checkPlagiarism = async (req, res, next) => {
   const assignment_id = req.params.id;
-  const mlUrl = req.hostname === 'localhost'
-  ? "http://localhost:8081" : process.env.NODE_URL;
+  // const mlUrl = req.hostname === 'localhost'
+  // ? "http://localhost:8081" : process.env.NODE_URL;
+  const mlUrl = process.env.NODE_URL
   // console.log(assignment_id);
   if (!mongoose.Types.ObjectId.isValid(assignment_id)) {
     return res.status(400).json({
