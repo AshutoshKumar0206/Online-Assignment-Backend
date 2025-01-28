@@ -367,9 +367,30 @@ module.exports.checkPlagiarism = async (req, res, next) => {
       } else if(submission.status === 'late') {
           late+=1;       
       } else {
-          notSubmitted = submissions.length - submitted - late;
+          
       }
     })
+    // // Fetch the subject using the subjectId
+    const assignm = await Assignment.findOne({ _id: new mongoose.Types.ObjectId(assignment_id) });
+if (!assignm) {
+  return res.status(404).json({
+    success: false,
+    message: 'Assignment not found',
+  });
+}
+
+// Fetch the subject using the subjectId from the assignment
+const subject = await Subject.findOne({ _id: new mongoose.Types.ObjectId(assignm.subjectId) });
+if (!subject) {
+  return res.status(404).json({
+    success: false,
+    message: 'Subject not found',
+  });
+}
+
+// Calculate not submitted count
+notSubmitted = subject.students_id.length - submitted - late;
+    // notSubmitted=submitted+late;
     // Create a mapping of studentId to fileUrl
     const fileUrlMap = submissions.reduce((map, submission) => {
       map[submission.studentId] = submission.fileURL;
