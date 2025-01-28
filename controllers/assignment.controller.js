@@ -371,7 +371,6 @@ module.exports.checkPlagiarism = async (req, res, next) => {
       fileUrl: submission.fileURL,
     }));
     console.log(fileDetails);
-    // Send file details to ML model
     let mlResponse;
     try {
       mlResponse = await axios.post(
@@ -386,40 +385,38 @@ module.exports.checkPlagiarism = async (req, res, next) => {
         message: 'Failed to connect to ML model',
       });
     }
-    console.log('hello', mlResponse.data);
-    // Process ML response
+    
     const results = await Promise.all(
       mlResponse.data.results.map(async (response) => {
-        // const student1 = await userModel
-        //   .findById(new mongoose.Types.ObjectId(response.studentId1))
-        //   .select('firstName lastName')
-        //   .exec();
-        // const student2 = await userModel
-        //   .findById(new mongoose.Types.ObjectId(response.studentId2))
-        //   .select('firstName lastName')
-        //   .exec();
-        console.log(response['Assignment 1']);
+        const student1 = await userModel
+          .findById(new mongoose.Types.ObjectId(response.studentId1))
+          .select('firstName lastName')
+          .exec();
+        const student2 = await userModel
+          .findById(new mongoose.Types.ObjectId(response.studentId2))
+          .select('firstName lastName')
+          .exec();
+
         return {
-          Assignment1: response['Assignment 1'],
-          Assignment2: response['Assignment 2'],
-          Similarity: response['Similarity (%)'],
-          // CombinedSimilarity: response.CombinedSimilarity,
-          // FingerprintSimilarity: response.FingerprintSimilarity,
-          // SemanticSimilarity: response.SemanticSimilarity,
-          // studentId1: student1
-          //   ? {
-          //       name: `${student1.firstName} ${student1.lastName}`,
-          //       fileUrl: fileUrlMap[response.studentId1],
-          //       id: response.studentId1,
-          //     }
-          //   : { name: response.studentId1, fileUrl: null, id: response.studentId1},
-          // studentId2: student2
-          //   ? {
-          //       name: `${student2.firstName} ${student2.lastName}`,
-          //       fileUrl: fileUrlMap[response.studentId2],
-          //       id: response.studentId2,
-          //     }
-          //   : { name: response.studentId2, fileUrl: null, id: response.studentId2},
+          Assignment1: response.Assignment1,
+          Assignment2: response.Assignment2,
+          CosineSimilarity: response['Cosine Similarity (%)'],
+          JaccardSimilarity: response['Jaccard Similarity (%)'],
+          CombinedSimilarity: response['Combined Similarity (%)'],
+          studentId1: student1
+            ? {
+                name: `${student1.firstName} ${student1.lastName}`,
+                fileUrl: fileUrlMap[response.studentId1],
+                id: response.studentId1,
+              }
+            : { name: response.studentId1, fileUrl: null, id: response.studentId1},
+          studentId2: student2
+            ? {
+                name: `${student2.firstName} ${student2.lastName}`,
+                fileUrl: fileUrlMap[response.studentId2],
+                id: response.studentId2,
+              }
+            : { name: response.studentId2, fileUrl: null, id: response.studentId2},
         };
       })
     );
