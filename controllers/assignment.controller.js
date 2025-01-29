@@ -240,6 +240,10 @@ module.exports.getAllAssignments = async (req, res) => {
     const submittedSubmissions = [];
     const lateSubmissions = [];
 
+
+    let late=0, submitted=0, notSubmitted=0;
+   
+
     submissions.forEach((submission) => {
       const formattedSubmission = {
         studentId: submission.studentId._id,
@@ -251,10 +255,34 @@ module.exports.getAllAssignments = async (req, res) => {
 
       if (submission.status === "submitted") {
         submittedSubmissions.push(formattedSubmission);
+        submitted++;
       } else if (submission.status === "late") {
         lateSubmissions.push(formattedSubmission);
+        late++;
       }
     });
+
+
+     // // Fetch the subject using the subjectId
+     const assignm = await Assignment.findOne({ _id: new mongoose.Types.ObjectId(id) });
+     if (!assignm) {
+       return res.status(404).json({
+         success: false,
+         message: 'Assignment not found',
+       });
+     }
+     
+     // Fetch the subject using the subjectId from the assignment
+     const subject = await Subject.findOne({ _id: new mongoose.Types.ObjectId(assignm.subjectId) });
+     if (!subject) {
+       return res.status(404).json({
+         success: false,
+         message: 'Subject not found',
+       });
+     }
+     
+     // Calculate not submitted count
+     notSubmitted = subject.students_id.length - submitted - late;
 
     res.status(200).json({
       success: true,
@@ -263,9 +291,13 @@ module.exports.getAllAssignments = async (req, res) => {
         submitted: submittedSubmissions,
         late: lateSubmissions,
       },
+      submitted,
+      late, 
+      notSubmitted,
     });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch submissions" });
+    console.log(err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -359,7 +391,6 @@ module.exports.checkPlagiarism = async (req, res, next) => {
         message: 'No submissions found for this assignment',
       });
     }
-    console.log(submissions);
     let late=0, submitted=0, notSubmitted=0;
     submissions.map((submission) => {
       if(submission.status === 'submitted') {
