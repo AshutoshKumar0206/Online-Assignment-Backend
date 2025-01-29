@@ -433,7 +433,7 @@ notSubmitted = subject.students_id.length - submitted - late;
       studentId: submission.studentId,
       fileUrl: submission.fileURL,
     }));
-    console.log(fileDetails);
+
     let mlResponse;
     try {
       mlResponse = await axios.post(
@@ -500,3 +500,31 @@ notSubmitted = subject.students_id.length - submitted - late;
     });
   }
 };
+
+module.exports.marksAndFeedback = async (req, res, next) => {
+  try{
+    const assignmentId = req.params.id; 
+    const studentId = req.params.studentId;
+    const marks = req.body.marks;
+    const feedback = req.body.feedback;
+    const submission = await Submission.findOneAndUpdate({assignmentId : assignmentId, studentId : studentId}, 
+      {grade : marks, feedback : feedback});
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        message: 'Submission not found',
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Submission marks and feedback successfully updated',
+    });
+
+  } catch(err){
+    console.log(err);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    })
+  }
+}
