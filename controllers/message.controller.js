@@ -64,16 +64,19 @@ module.exports.sendMessage = async (req, res) => {
     try {
       const { id } = req.params; 
       const userId = req.user.id; 
+      console.log(`userId: ${userId}`);
   
       const message = await Message.findById(id);
+      console.log(`messageId: ${message.senderId}`);
   
       if (!message) {
         return res.status(404).json({ error: "Message not found" });
       }
       
-      // if (message.senderId !== userId) {
-      //   return res.status(403).json({ error: "Unauthorized to delete this message" });
-      // }
+      if (message.senderId != userId) {
+        console.log("nhi delete kr sakta hai tum bhai");
+        return res.status(403).json({ error: "Unauthorized to delete this message" });
+      }
   
       await Message.findByIdAndDelete(id);
   
