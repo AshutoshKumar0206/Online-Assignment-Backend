@@ -60,7 +60,7 @@ module.exports.signup = async (req, res, next) => {
       lastName,
       email,
       password: hashedPassword,
-      role, // Default role; admin will confirm the role
+      role, 
     });
 
     await newUser.save();
@@ -178,7 +178,7 @@ module.exports.sendotp = async (req, res) => {
 
 module.exports.verifyotp = async (req, res) => {
   try {
-    const { otp, email, role } = req.body;
+    const { otp, email } = req.body;
 
     if (!otp || !email) {
       return res.status(400).json({
@@ -206,7 +206,7 @@ module.exports.verifyotp = async (req, res) => {
       lastName: currUser.lastName,
       email: currUser.email,
       password: currUser.password,
-      role: role || "student", // Default to "student" if role is not provided    
+      role: currUser.role || "student", // Default to "student" if role is not provided    
     });
 
     await approvedUser.save();
