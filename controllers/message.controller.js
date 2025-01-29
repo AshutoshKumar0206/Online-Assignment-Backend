@@ -74,7 +74,6 @@ module.exports.sendMessage = async (req, res) => {
       }
       
       if (message.senderId != userId) {
-        console.log("nhi delete kr sakta hai tum bhai");
         return res.status(403).json({ error: "Unauthorized to delete this message" });
       }
   
@@ -82,7 +81,6 @@ module.exports.sendMessage = async (req, res) => {
   
       res.status(200).json({ success: true, message: "Message deleted successfully" });
     } catch (error) {
-      console.log("Error in deleteMessage controller: ", error.message);
       res.status(500).json({ error: "Internal server error" });
     }
   };
