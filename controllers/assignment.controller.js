@@ -492,6 +492,7 @@ notSubmitted = subject.students_id.length - submitted - late;
       submitted,
       late,
       notSubmitted,
+      submissions,
     });
   } catch (err) {
     return res.status(500).json({
