@@ -371,10 +371,8 @@ module.exports.getAssignmentSubmission = async (req, res) => {
 
 module.exports.checkPlagiarism = async (req, res, next) => {
   const assignment_id = req.params.id;
-  // const mlUrl = req.hostname === 'localhost'
-  // ? "http://localhost:8081" : process.env.NODE_URL;
-  const mlUrl = process.env.NODE_URL
-  // console.log(assignment_id);
+  const mlUrl = process.env.NODE_URL;
+
   if (!mongoose.Types.ObjectId.isValid(assignment_id)) {
     return res.status(400).json({
       success: false,
@@ -383,54 +381,50 @@ module.exports.checkPlagiarism = async (req, res, next) => {
   }
 
   try {
-    // Fetch submissions
-    const submissions = await Submission.find({ assignmentId: new mongoose.Types.ObjectId(assignment_id) });
+    // Fetch submissions and populate student details
+    const submissions = await Submission.find({ assignmentId: new mongoose.Types.ObjectId(assignment_id) })
+      .populate('studentId', 'firstName lastName rollNo');
     if (!submissions.length) {
       return res.status(404).json({
         success: false,
         message: 'No submissions found for this assignment',
       });
     }
-    let late=0, submitted=0, notSubmitted=0;
+
+    let late = 0, submitted = 0, notSubmitted = 0;
     submissions.map((submission) => {
-      if(submission.status === 'submitted') {
-          submitted+=1;
-      } else if(submission.status === 'late') {
-          late+=1;       
-      } else {
-          
+      if (submission.status === 'submitted') {
+        submitted += 1;
+      } else if (submission.status === 'late') {
+        late += 1;
       }
-    })
-    // // Fetch the subject using the subjectId
+    });
+
     const assignm = await Assignment.findOne({ _id: new mongoose.Types.ObjectId(assignment_id) });
-if (!assignm) {
-  return res.status(404).json({
-    success: false,
-    message: 'Assignment not found',
-  });
-}
+    if (!assignm) {
+      return res.status(404).json({
+        success: false,
+        message: 'Assignment not found',
+      });
+    }
 
-// Fetch the subject using the subjectId from the assignment
-const subject = await Subject.findOne({ _id: new mongoose.Types.ObjectId(assignm.subjectId) });
-if (!subject) {
-  return res.status(404).json({
-    success: false,
-    message: 'Subject not found',
-  });
-}
+    const subject = await Subject.findOne({ _id: new mongoose.Types.ObjectId(assignm.subjectId) });
+    if (!subject) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subject not found',
+      });
+    }
 
-// Calculate not submitted count
-notSubmitted = subject.students_id.length - submitted - late;
-    // notSubmitted=submitted+late;
-    // Create a mapping of studentId to fileUrl
+    notSubmitted = subject.students_id.length - submitted - late;
+
     const fileUrlMap = submissions.reduce((map, submission) => {
-      map[submission.studentId] = submission.fileURL;
+      map[submission.studentId._id] = submission.fileURL;
       return map;
     }, {});
-    
-    // Prepare file details
+
     const fileDetails = submissions.map((submission) => ({
-      studentId: submission.studentId,
+      studentId: submission.studentId._id,
       fileUrl: submission.fileURL,
     }));
 
@@ -448,16 +442,16 @@ notSubmitted = subject.students_id.length - submitted - late;
         message: 'Failed to connect to ML model',
       });
     }
-    
+
     const results = await Promise.all(
       mlResponse.data.results.map(async (response) => {
         const student1 = await userModel
           .findById(new mongoose.Types.ObjectId(response.studentId1))
-          .select('firstName lastName')
+          .select('firstName lastName rollNo')
           .exec();
         const student2 = await userModel
           .findById(new mongoose.Types.ObjectId(response.studentId2))
-          .select('firstName lastName')
+          .select('firstName lastName rollNo')
           .exec();
 
         return {
@@ -469,22 +463,32 @@ notSubmitted = subject.students_id.length - submitted - late;
           studentId1: student1
             ? {
                 name: `${student1.firstName} ${student1.lastName}`,
+                rollNo: student1.rollNo,
                 fileUrl: fileUrlMap[response.studentId1],
                 id: response.studentId1,
               }
-            : { name: response.studentId1, fileUrl: null, id: response.studentId1},
+            : { name: response.studentId1, rollNo: null, fileUrl: null, id: response.studentId1 },
           studentId2: student2
             ? {
                 name: `${student2.firstName} ${student2.lastName}`,
+                rollNo: student2.rollNo,
                 fileUrl: fileUrlMap[response.studentId2],
                 id: response.studentId2,
               }
-            : { name: response.studentId2, fileUrl: null, id: response.studentId2},
+            : { name: response.studentId2, rollNo: null, fileUrl: null, id: response.studentId2 },
         };
       })
     );
 
-    // Send response
+    const updatedSubmissions = submissions.map(submission => ({
+      studentId: submission.studentId._id,
+      firstName: submission.studentId.firstName,
+      lastName: submission.studentId.lastName,
+      rollNo: submission.studentId.rollNo,
+      fileURL: submission.fileURL,
+      status: submission.status,
+    }));
+
     return res.status(200).json({
       success: true,
       message: 'Submitted files sent to check Plagiarism',
@@ -492,7 +496,7 @@ notSubmitted = subject.students_id.length - submitted - late;
       submitted,
       late,
       notSubmitted,
-      submissions,
+      submissions: updatedSubmissions,
     });
   } catch (err) {
     return res.status(500).json({
