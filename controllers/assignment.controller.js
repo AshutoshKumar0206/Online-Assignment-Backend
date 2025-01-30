@@ -487,6 +487,8 @@ module.exports.checkPlagiarism = async (req, res, next) => {
       rollNo: submission.studentId.rollNo,
       fileURL: submission.fileURL,
       status: submission.status,
+      grade: submission.grade,
+      feedback: submission.feedback,
     }));
 
     return res.status(200).json({
