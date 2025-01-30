@@ -11,6 +11,7 @@ const adminRoutes = require("./routes/admin.route");
 const messageRoutes = require("./routes/message.route.js");
 const assignmentRoutes = require("./routes/assignment.route");
 const subjectRoutes = require("./routes/subject.route.js");
+const notificationRoutes = require("./routes/notification.route.js");
 const PORT = process.env.PORT || 4000;
 const { createSubject } = require("./controllers/subject.controller");
 const { app, server } =require( "./lib/socket.js");
@@ -47,6 +48,7 @@ app.use(
 app.use("/", indexRoutes);
 app.use("/user", userRoutes);
 app.use("/message", messageRoutes);
+app.use("/notification", notificationRoutes);
 app.use("/admin", adminRoutes);
 //cloudinary connection
 cloudinaryConnect();
