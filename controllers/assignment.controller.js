@@ -512,7 +512,7 @@ module.exports.marksAndFeedback = async (req, res, next) => {
   try{
     const assignmentId = req.params.id; 
     const studentId = req.params.studentId;
-    const marks = req.body.marks;
+    const marks = req.body.grade;
     const feedback = req.body.feedback;
     const submission = await Submission.findOneAndUpdate({assignmentId : assignmentId, studentId : studentId}, 
       {grade : marks, feedback : feedback});
