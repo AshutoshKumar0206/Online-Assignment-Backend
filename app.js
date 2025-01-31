@@ -14,6 +14,7 @@ const subjectRoutes = require("./routes/subject.route.js");
 const PORT = process.env.PORT || 4000;
 const { createSubject } = require("./controllers/subject.controller");
 const { app, server } =require( "./lib/socket.js");
+const notificationRoutes = require("./routes/notification.route.js");
 //To initialize a server
 
 
@@ -48,52 +49,13 @@ app.use("/", indexRoutes);
 app.use("/user", userRoutes);
 app.use("/message", messageRoutes);
 app.use("/admin", adminRoutes);
+app.use("/notification", notificationRoutes);
 //cloudinary connection
 cloudinaryConnect();
 app.use("/assignment", assignmentRoutes);
 app.use("/subject", subjectRoutes);
 
-// let users = []; //To store active users and select the users to chat with
-// io.on('connection', (socket) => {
-//     // console.log('a user connected');
-//     //Listen for the 'New Subject' event
-//    socket.on('New-Subject', (notification)=>{
-//     socket.emit('New-Subject', {message:notification.message});
-//    })
-  
-//     socket.on('disconnect', () => {
-//       console.log('user disconnected');
-//     });
-// });
-// io.on('connection', (socket) => {
-//     console.log('user connected:', socket.id);
-    
-// socket.on('join', ({ email, role }) => {
-//     users[socket.id] = { email, role };
-//     console.log(`${email} joined as ${role}`);
-// });
 
-
-// socket.on('sendMessage', ({ sender, receiver, message }) => {
-//     const recipientSocketId = Object.keys(users).find(
-//         (key) => users[key].username === receiver
-//     );
-    
-//     if (recipientSocketId) {
-//         io.to(recipientSocketId).emit('receivedMessage', {
-//             sender,
-//             message,
-//         });
-//     } else {
-//         socket.emit('error', 'User not available.');
-//     }
-// });
-// //To disconnect the chat
-// socket.on('disconnect', () => {
-//     console.log('User had disconnected:', users[socket.id]?.username);
-//     delete users[socket.id];
-// });
-// });
 
 server.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`);
