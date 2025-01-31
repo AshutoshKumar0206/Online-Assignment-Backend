@@ -169,6 +169,7 @@ module.exports.addStudent = async (req, res, next) => {
     }
     let listOfEmails = emails.split(',').map(email => email.trim());
      let notFoundStudents = [];
+     let newlyAddedStudents = []; 
      
      for(const email of listOfEmails){
       // Check if the email is empty
@@ -184,10 +185,13 @@ module.exports.addStudent = async (req, res, next) => {
         let subjects = await userModel.findByIdAndUpdate(
           student._id, { $addToSet: { subjects: subjectId.toString() } },{ new: true }
         );
+        newlyAddedStudents.push(student._id.toString());
         } else{
           let notStudent = notFoundStudents.push(email);
         }
       }
+
+      
       
       let studentsAdded = await Subject.findById(subjectId).populate({ path: 'students_id', select: '-password -subjects',});
     res.status(200).json({ 
@@ -195,6 +199,7 @@ module.exports.addStudent = async (req, res, next) => {
       message: "Students added successfully.",
       notFoundStudents,
       students_id: studentsAdded.students_id,
+      addedStudents: newlyAddedStudents
   });
 
   } catch(err){
@@ -219,10 +224,11 @@ module.exports.removeStudent = async (req, res, next) => {
       await userModel.findOneAndUpdate({email : email}, {
           $pull: { subjects: subjectId.toString() },
       });
-
+      let removedStudents = [studentId];
       res.status(200).send({ 
         success: true, 
-        message: 'Student removed successfully'
+        message: 'Student removed successfully',
+        removedStudents,
       });
 
   } catch(err){
