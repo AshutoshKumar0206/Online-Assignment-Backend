@@ -11,6 +11,7 @@ const resetTemplate = require("../mail/resetPassOtp")
 const mailSender = require("../utils/mailsender");
 const passwordUpdateTemplate = require("../mail/PasswordUpdate");
 const Subject = require('../models/Subject');
+const contactUs = require('../models/ContactUs');
 const mongoose = require('mongoose');
 const { uploadImageToCloudinary } = require('../utils/imageUploader')
 require('dotenv').config();
@@ -606,4 +607,38 @@ try{
       message: err.message,
     }) 
 }
+}
+
+module.exports.contactUs = async(req, res, next) => {
+  try{
+    const name = req.body.name;
+    const email = req.body.email;
+    const feedback = req.body.feedback;
+    let userFeedback = await contactUs.findOne({email});
+    if(userFeedback){
+      userFeedback.feedback.push(feedback);
+      await userFeedback.save();
+      res.status(200).json({
+        success:true,
+        message: 'Feedback Sent successfully!',
+      })
+    }
+    else{
+    const newFeedback = await contactUs.create({
+      name,
+      email,
+      feedback:[feedback],
+    })
+    await newFeedback.save();
+    res.status(200).json({
+      success: true,
+      message: 'Feedback Sent successfully!',
+    })
+  }
+  }catch(err) {
+      res.status(500).json({
+        success: false,
+        message: "Some problem occured in processing your request",     
+      })
+  }
 }
