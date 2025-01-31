@@ -7,6 +7,7 @@ const pendingUserModel = require("../models/pendingUser");
 const userModel = require("../models/User");
 const Subject = require("../models/Subject");
 const Submission = require("../models/Submission");
+const contactUs = require("../models/ContactUs");
 const approveUserTemplate = require("../mail/approveUserTemplate");
 const mailSender = require("../utils/mailsender");
 const mongoose = require('mongoose');
@@ -297,4 +298,20 @@ module.exports.viewUser = async (req, res,next) => {
         message: "Error fetching User Profile",
       });
     }
+}
+
+module.exports.getFeedback = async(req, res, next) => {
+  try{
+    const Feedbacks = await contactUs.find();
+    res.status(200).json({
+      success: true,
+      message: "Feedback fetched successfully!",
+      Feedbacks,
+    })
+  }catch(err) {
+      res.status(500).json({
+        success: false,
+        message: "Some Problem occured in fetching Feedbacks"    
+      })
+  }
 }
