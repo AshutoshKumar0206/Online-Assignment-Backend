@@ -129,7 +129,7 @@ module.exports.getSubject = async (req, res, next) => {
     let assignments = [];
     if (subject.assignments_id && subject.assignments_id.length > 0) {
       assignments = await assignmentModel.find({ _id: { $in: subject.assignments_id } })
-        .select('_id title') // Only include ID and title
+        .select('_id title deadline') // Only include ID and title
         .lean(); // Return plain JavaScript objects
     }
 
