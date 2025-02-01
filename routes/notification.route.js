@@ -12,4 +12,7 @@ router.get("/:userId", isAuthenticated, notificationController.getNotifications)
 // Route to delete all read notifications for a user
 router.delete("/delete/:userId", isAuthenticated, notificationController.deleteNotification);
 
+// Route to get all unread notifications for a user
+router.get("/unread/:userId", isAuthenticated, notificationController.getUnreadNotifications);
+
 module.exports = router;
