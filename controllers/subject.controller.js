@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Subject = require('../models/Subject'); // Ensure this path points to your Subject model
 const userModel = require('../models/User'); // Ensure this path points to your User model
 const assignmentModel = require("../models/Assignment");
-const submissionModel = require("../models/Submission")
+const submissionModel = require("../models/Submission");
 const fileUpload = require('express-fileupload');
 const { uploadDocsToCloudinary } = require('../utils/docsUploader');
 
@@ -207,37 +207,53 @@ module.exports.addStudent = async (req, res, next) => {
   }
 }
 
-//Controller for removing students
+
 module.exports.removeStudent = async (req, res, next) => {
   let subjectId = req.params.id;
   let studentId = req.body.studentId;
   const email = req.body.studentEmail;
-  try{
-    // Remove studentId from subject's studentIds array
-    let subject = await Subject.findOne({subject_id : subjectId});
-    
-    await Subject.findOneAndUpdate({subject_id : subjectId}, {
-      $pull: { students_id: studentId },
-    });
-    subjectId = subject._id;
-      // Remove subjectId from student's subjects array
-      await userModel.findOneAndUpdate({email : email}, {
-          $pull: { subjects: subjectId.toString() },
-      });
-      let removedStudents = [studentId];
-      res.status(200).send({ 
-        success: true, 
-        message: 'Student removed successfully',
-        removedStudents,
-      });
+  console.log("a remove student request is received", subjectId, studentId, email);
 
-  } catch(err){
-    res.status(500).send({ 
-      success: false, 
-      message: 'Internal Server Error', 
+  try {
+    // Find the subject by subject_id
+    let subject = await Subject.findOne({ subject_id: subjectId });
+    if (!subject) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subject not found',
+      });
+    }
+
+    // Remove subjectId from student's subjects array
+    await userModel.findOneAndUpdate(
+      { email: email },
+      { $pull: { subjects: subject._id.toString() } }
+    );
+
+    // Remove submissions of the student in the assignments of that subject
+    await submissionModel.deleteMany({
+      assignmentId: { $in: subject.assignments_id },
+      studentId: studentId,
+    });
+
+    // Remove studentId from subject's students_id array
+    await Subject.findOneAndUpdate(
+      { subject_id: subjectId },
+      { $pull: { students_id: studentId } }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: 'Student removed successfully',
+      removedStudents: [studentId],
+    });
+  } catch (err) {
+    res.status(500).send({
+      success: false,
+      message: 'Internal Server Error',
     });
   }
-}
+};
 
 
 module.exports.joinSubject = async (req, res, next) => {
