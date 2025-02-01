@@ -48,6 +48,21 @@ module.exports.createNotification = async(req,res) => {
             res.status(500).json({ error: err.message });
         }
     };
+
+    module.exports.getUnreadNotifications = async (req, res) => {
+         try{
+          const notifications = await Notification.find({receiverId: req.params.userId, status: "unread"})
+          .populate("senderId", "_id firstName lastName")
+          .sort({ createdAt: -1 });
+
+          res.status(200).send({ 
+            success: true, 
+            notifications
+          });
+         }catch ( error ){
+          res.status(500).json({ error: err.message });
+         }
+    }
     
 
 module.exports.deleteNotification = async(req,res) => {
