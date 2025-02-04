@@ -347,6 +347,7 @@ module.exports.getAssignmentSubmission = async (req, res) => {
   try {
     // Find the submission with the given assignmentId and studentId
     const submission = await Submission.findOne({ assignmentId, studentId });
+    console.log(submission);
 
     if (!submission) {
       return res.status(404).json({
@@ -360,6 +361,9 @@ module.exports.getAssignmentSubmission = async (req, res) => {
       success: true,
       message: 'Submission found',
       fileURL: submission.fileURL,
+      status: submission.status,
+      grade: submission.grade,
+      feedback: submission.feedback,
     });
   } catch (error) {
     res.status(500).json({
