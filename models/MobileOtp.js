@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-const OTPSchema = new mongoose.Schema(
+const MobileOTPSchema = new mongoose.Schema(
   {
-    mobileNo: {
+    contact: {
       type: String,
       required: true,
       index: true, // Index for faster lookups
@@ -21,10 +21,10 @@ const OTPSchema = new mongoose.Schema(
 );
 
 // Expire OTP after 5 minutes
-OTPSchema.index({ createdAt: 1 }, { expireAfterSeconds: 300 });
+MobileOTPSchema.index({ createdAt: 1 }, { expireAfterSeconds: 300 });
 
 // Hash OTP before saving
-OTPSchema.pre("save", async function (next) {
+MobileOTPSchema.pre("save", async function (next) {
   if (!this.isModified("otp")) return next();
   const salt = await bcrypt.genSalt(10);
   this.otp = await bcrypt.hash(this.otp, salt);
@@ -32,10 +32,10 @@ OTPSchema.pre("save", async function (next) {
 });
 
 // Method to validate OTP
-OTPSchema.methods.validateOTP = async function (enteredOtp) {
+MobileOTPSchema.methods.validateOTP = async function (enteredOtp) {
   return await bcrypt.compare(enteredOtp, this.otp);
 };
 
-const OTP = mongoose.model("OTP", OTPSchema);
+const MobileOTP = mongoose.model("MobileOTP", MobileOTPSchema);
 
-module.exports = OTP;
+module.exports = MobileOTP;
