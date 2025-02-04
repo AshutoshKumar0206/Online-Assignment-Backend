@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const BlacklistModel = require("../models/blacklist.model");
 const otpGenerator = require("otp-generator");
 const OTP = require("../models/Otp");
+const MobileOTP = require("../models/MobileOtp");
 const emailTemplate = require("../mail/emailVerificationTemplate");
 const resetTemplate = require("../mail/resetPassOtp")
 const mailSender = require("../utils/mailsender");
@@ -14,6 +15,11 @@ const Subject = require('../models/Subject');
 const contactUs = require('../models/ContactUs');
 const mongoose = require('mongoose');
 const { uploadImageToCloudinary } = require('../utils/imageUploader')
+const twilio = require('twilio')
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const twilioClient = twilio(accountSid, authToken);
+const twilioNumber = process.env.CONTACT;  
 require('dotenv').config();
 
 module.exports.signup = async (req, res, next) => {
@@ -362,6 +368,39 @@ exports.resetPassword = async (req, res) => {
 	}
 };
 
+module.exports.verifyMobileOtp = async(req, res, next) => {
+  try{ 
+    const {contact, otp} = req.body;
+    if (!otp || !contact) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP and contact are required",
+      });
+    }
+
+    const otpEntry = await OTP.findOne({ contact, otp });
+    if (!otpEntry) {
+      return res.status(401).json({ message: "Invalid OTP." });
+    }
+    
+    // Send confirmation message
+    await twilioClient.messages.create({
+      body: "Your phone number has been successfully updated.",
+      from: twilioNumber,
+      to: `+${contact}`, // Ensure it's in international format
+    });
+    res.status(200).json({
+      success:true,
+      message:"OTP verified successfully",
+    })
+  }catch(err){
+    res.status(500).json({
+      success:false,
+      message:"Error in Verifying OTP",
+    })
+  }
+}
+
 module.exports.dashboard = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -525,6 +564,36 @@ module.exports.updateProfile = async (req, res, next) => {
   let exprerience = req.body.profileInput.exprerience;
   let employeeId = req.body.profileInput.employeeId;
 
+  //for phone number
+    // contact = parseInt(contact, 10)
+    // contact = contact.replace(/\D/g, "");
+    console.log(contact)
+    if (!/^\d{10,15}$/.test(contact)) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Invalid phone number format" });
+    }
+    let otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+    });
+
+    const result = await MobileOTP.findOne({ otp: otp });
+
+    while (result) {
+      otp = otpGenerator.generate(6, {
+        upperCaseAlphabets: false,
+      });
+    }
+     
+    const otpPayload = { contact, otp };
+    const otpBody = await MobileOTP.create(otpPayload);
+    await twilioClient.messages.create({
+      body: `Your otp for updating your Phone Number: ${otp}.`,
+      from: twilioNumber,
+      to: `+91${contact}`, // Ensure it's in international format
+    });
 
   try{
     const user = await userModel.findById(userId).select("-password");
