@@ -40,7 +40,7 @@ const AssignmentSchema = new mongoose.Schema({
   filePublicId: {
     type: String, // Cloudinary's public ID for file management
   },
-  open: {
+  status: {
     type: Boolean,
     default: true,
   }

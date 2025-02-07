@@ -80,6 +80,7 @@ module.exports.createAssignment = async (req, res) => {
       maxVal,
       fileLink: uploadResults.secure_url,
       filePublicId: uploadResults.public_id,
+      status:true,
     });
  
     const savedAssignment = await newAssignment.save();
@@ -132,6 +133,47 @@ module.exports.getAssignmentDetails = async (req, res, next) => {
   }
 };
 
+
+//route to change status of the  assignment
+module.exports.changeStatus = async (req, res) => {
+  const { id } = req.params; // Assignment ID from route parameters
+  console.log(id);
+
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: 'Assignment ID is required',
+    });
+  }
+
+  try {
+    // Find the assignment by ID
+    const assignment = await Assignment.findById(id);
+    if (!assignment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Assignment not found',
+      });
+    }
+
+    // Toggle the status
+    assignment.status = !assignment.status;
+    await assignment.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Assignment status updated successfully',
+      assignment,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
+
 // const Assignment = require('path-to-your-assignment-model'); // Import the Assignment model
 
 module.exports.submitAssignment = async (req, res) => {
@@ -145,6 +187,13 @@ module.exports.submitAssignment = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Assignment not found',
+      });
+    }
+
+    if (!assignment.status) {
+      return res.status(201).json({
+        success: false,
+        message: 'Assignment has been closed, please contact your teacher',
       });
     }
 
@@ -216,6 +265,7 @@ module.exports.submitAssignment = async (req, res) => {
       });
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       success: false,
       message: 'Failed to submit assignment',
