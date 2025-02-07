@@ -10,8 +10,11 @@ router.post('/new/:id', isAuthenticated, assignmentController.createAssignment);
 //route to get details of an assignment
 router.get("/:id", isAuthenticated, assignmentController.getAssignmentDetails);
 
-//rote to submit assignment of the 
+//route to submit assignment of the students
 router.post("/submitassignment/:id", isAuthenticated, assignmentController.submitAssignment);
+
+//route to change status of the  assignment
+router.put("/:id", isAuthenticated, assignmentController.changeStatus);
 
 //route to get all submissions of the assignment
 router.get("/submission/:id", isAuthenticated, assignmentController.getAllAssignments);
