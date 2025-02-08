@@ -19,12 +19,14 @@ const twilio = require('twilio')
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioClient = twilio(accountSid, authToken);
-const twilioNumber = process.env.CONTACT;  
+const twilioNumber = process.env.CONTACT;
+const RECAPTCHA_SECRET_KEY = process.env.CAPTCHA_SECRET;
 require('dotenv').config();
+const axios = require('axios')
 
 module.exports.signup = async (req, res, next) => {
   try {
-    const { firstName, lastName, email, password, confirmPassword, role } = req.body;
+    const { firstName, lastName, email, password, confirmPassword, role, recaptchaToken } = req.body;
     if (!email || !password || !confirmPassword || !firstName || !lastName) {
       return res.status(400).json({
         message: "All fields are required",
@@ -33,7 +35,6 @@ module.exports.signup = async (req, res, next) => {
 
     // Password validation regex
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*])[A-Za-z\d@#$%^&*]{8,}$/;
-
     // Check if password meets the criteria
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
@@ -59,6 +60,20 @@ module.exports.signup = async (req, res, next) => {
         message: "User already exists or requires Admin approval.",
       });
     }
+    const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
+    const response = await axios.post(
+      verifyUrl,
+      new URLSearchParams({
+        secret: RECAPTCHA_SECRET_KEY,
+        response: recaptchaToken
+      })
+    );
+    if (!response.data.success) {
+      return res.status(403).json({
+        success: false,
+        message: "reCAPTCHA verification failed. Please try again.",
+      });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -67,7 +82,7 @@ module.exports.signup = async (req, res, next) => {
       lastName,
       email,
       password: hashedPassword,
-      role, 
+      role,
     });
 
     await newUser.save();
@@ -84,7 +99,7 @@ module.exports.signup = async (req, res, next) => {
 
 module.exports.signin = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, recaptchaToken, failedAttempts } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -92,8 +107,30 @@ module.exports.signin = async (req, res, next) => {
         message: "Please fill all required fields",
       });
     }
+    if (failedAttempts >= 3) {
+      if (!recaptchaToken) {
+        return res.status(401).json({
+          success: false,
+          message: "Please complete the reCAPTCHA verification.",
+        });
+      }
+      const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
+      const response = await axios.post(
+        verifyUrl,
+        new URLSearchParams({
+          secret: RECAPTCHA_SECRET_KEY,
+          response: recaptchaToken
+        })
+      );
+      if (!response.data.success) {
+        return res.status(403).json({
+          success: false,
+          message: "reCAPTCHA verification failed. Please try again.",
+        });
+      }
+    }
 
-  const user = await userModel.findOne({ email });
+    const user = await userModel.findOne({ email });
 
     if (!user) {
       return res.status(401).json({
@@ -110,7 +147,7 @@ module.exports.signin = async (req, res, next) => {
         message: "Invalid credentials",
       });
     } else if (isPasswordCorrect) {
-      const token = jwt.sign({email: user.email, id: user._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
+      const token = jwt.sign({ email: user.email, id: user._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
 
       user.token = token;
       user.password = undefined;
@@ -237,7 +274,7 @@ module.exports.logout = async (req, res, next) => {
         success: false,
         message: "No token provided",
       });
-  }
+    }
 
     const isTokenBlacklisted = await BlacklistModel.findOne({ token });
 
@@ -303,8 +340,8 @@ module.exports.sendresetpasswordotp = async (req, res) => {
 };
 
 exports.resetPassword = async (req, res) => {
-	try {
-		const { password, confirmPassword, otp, email } = req.body;
+  try {
+    const { password, confirmPassword, otp, email } = req.body;
 
     if (!otp || !email) {
       return res.status(400).json({
@@ -330,47 +367,47 @@ exports.resetPassword = async (req, res) => {
       });
     }
 
-		if (confirmPassword !== password) {
-			return res.json({
-				success: false,
-				message: "Password and Confirm Password does not Match",
-			});
-		}
-		const userDetails = await userModel.findOne({ email: email });
-		if (!userDetails) {
-			return res.json({
-				success: false,
-				message: "User is not Registered",
-			});
-		}
-		
-		const encryptedPassword = await bcrypt.hash(password, 10);
-		await userModel.findOneAndUpdate(
-			{ email: email },
-			{ password: encryptedPassword },
-			{ new: true }
-		);
+    if (confirmPassword !== password) {
+      return res.json({
+        success: false,
+        message: "Password and Confirm Password does not Match",
+      });
+    }
+    const userDetails = await userModel.findOne({ email: email });
+    if (!userDetails) {
+      return res.json({
+        success: false,
+        message: "User is not Registered",
+      });
+    }
+
+    const encryptedPassword = await bcrypt.hash(password, 10);
+    await userModel.findOneAndUpdate(
+      { email: email },
+      { password: encryptedPassword },
+      { new: true }
+    );
     const mailResponse = await mailSender(
       userDetails.email,
       `Password Reset email`,
       passwordUpdateTemplate(userDetails.email, userDetails.firstName, userDetails.lastName)
     )
-		res.json({
-			success: true,
-			message: `Password Reset Successful`,
-		});
-	} catch (error) {
-		return res.json({
-			error: error.message,
-			success: false,
-			message: `Some Error in Updating the Password`,
-		});
-	}
+    res.json({
+      success: true,
+      message: `Password Reset Successful`,
+    });
+  } catch (error) {
+    return res.json({
+      error: error.message,
+      success: false,
+      message: `Some Error in Updating the Password`,
+    });
+  }
 };
 
-module.exports.verifyMobileOtp = async(req, res, next) => {
-  try{ 
-    const {contact, otp} = req.body;
+module.exports.verifyMobileOtp = async (req, res, next) => {
+  try {
+    const { contact, otp } = req.body;
     if (!otp || !contact) {
       return res.status(400).json({
         success: false,
@@ -382,7 +419,7 @@ module.exports.verifyMobileOtp = async(req, res, next) => {
     if (!otpEntry) {
       return res.status(401).json({ message: "Invalid OTP." });
     }
-    
+
     // Send confirmation message
     await twilioClient.messages.create({
       body: "Your phone number has been successfully updated.",
@@ -390,13 +427,13 @@ module.exports.verifyMobileOtp = async(req, res, next) => {
       to: `+${contact}`, // Ensure it's in international format
     });
     res.status(200).json({
-      success:true,
-      message:"OTP verified successfully",
+      success: true,
+      message: "OTP verified successfully",
     })
-  }catch(err){
+  } catch (err) {
     res.status(500).json({
-      success:false,
-      message:"Error in Verifying OTP",
+      success: false,
+      message: "Error in Verifying OTP",
     })
   }
 }
@@ -404,7 +441,7 @@ module.exports.verifyMobileOtp = async(req, res, next) => {
 module.exports.dashboard = async (req, res, next) => {
   try {
     const { id } = req.params;
-    if(id !== req.user.id){
+    if (id !== req.user.id) {
       return res.status(404).send({
         success: false,
         message: 'User is unauthorized to check other persons data'
@@ -415,16 +452,16 @@ module.exports.dashboard = async (req, res, next) => {
         message: "Invalid user ID",
       });
     }
-    
+
     const user = await userModel
-    .findById(id)
-    .select("-password") // Exclude the password field
-    .populate({
-      path: "subjects",
-      select: "subject_name teacher_name teacher_id subject_id", // Fetch specific fields from subjects
-    })
-    .exec();
-    
+      .findById(id)
+      .select("-password") // Exclude the password field
+      .populate({
+        path: "subjects",
+        select: "subject_name teacher_name teacher_id subject_id", // Fetch specific fields from subjects
+      })
+      .exec();
+
     if (!user) {
       return res.status(200).json({
         success: false,
@@ -468,7 +505,7 @@ module.exports.dashboard = async (req, res, next) => {
 
 module.exports.getProfile = async (req, res, next) => {
   let userId = req.params.id;
-  
+
   // console.log(userId);
   try {
     userId = new mongoose.Types.ObjectId(userId);
@@ -497,41 +534,41 @@ module.exports.getProfile = async (req, res, next) => {
 
 module.exports.Profile = async (req, res, next) => {
   let userId = req.params.id;
-  try{
-    if(userId !== req.user.id){
+  try {
+    if (userId !== req.user.id) {
       return res.status(404).send({
         success: false,
         message: 'User is unauthorized to check other persons data'
       })
     }
-      userId = new mongoose.Types.ObjectId(userId); 
-      const user = await userModel.findById(userId).select("-password -subjects");
-      if(!user){
-          res.status(404).json({
-            success: false,
-            message: "User not found",
-          })
-      }
-      res.status(200).json({
-        success: true,
-        message: "User Profile",
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        rollNo: user.rollNo,
-        role: user.role,
-        branch: user.branch,
-        semester: user.semester,
-        contact: user.contact,
-        section: user.section,
-        updatedAt: user.updatedAt,
-        exprerience: user.exprerience,
-        employeeId: user.employeeId,
-        image: user.image,
+    userId = new mongoose.Types.ObjectId(userId);
+    const user = await userModel.findById(userId).select("-password -subjects");
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
       })
+    }
+    res.status(200).json({
+      success: true,
+      message: "User Profile",
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      rollNo: user.rollNo,
+      role: user.role,
+      branch: user.branch,
+      semester: user.semester,
+      contact: user.contact,
+      section: user.section,
+      updatedAt: user.updatedAt,
+      exprerience: user.exprerience,
+      employeeId: user.employeeId,
+      image: user.image,
+    })
 
-  }catch(err){
-    res.status(500).json({ 
+  } catch (err) {
+    res.status(500).json({
       success: false,
       message: "Error fetching User Profile",
     });
@@ -541,7 +578,7 @@ module.exports.Profile = async (req, res, next) => {
 module.exports.updateProfile = async (req, res, next) => {
   let userId = req.params.id;
 
-  if(userId !== req.user.id){
+  if (userId !== req.user.id) {
     return res.status(404).send({
       success: false,
       message: 'User is unauthorized to check other persons data'
@@ -565,49 +602,54 @@ module.exports.updateProfile = async (req, res, next) => {
   let employeeId = req.body.profileInput.employeeId;
 
   //for phone number
-    // contact = parseInt(contact, 10)
-    // contact = contact.replace(/\D/g, "");
-    console.log(contact)
-    if (!/^\d{10,15}$/.test(contact)) {
-      return res.status(400).json({ 
-        success: false,
-        message: "Invalid phone number format" });
-    }
-    let otp = otpGenerator.generate(6, {
+  // contact = parseInt(contact, 10)
+  // contact = contact.replace(/\D/g, "");
+  console.log(contact)
+  if (!/^\d{10,15}$/.test(contact)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid phone number format"
+    });
+  }
+  let otp = otpGenerator.generate(6, {
+    upperCaseAlphabets: false,
+    lowerCaseAlphabets: false,
+    specialChars: false,
+  });
+
+  const result = await MobileOTP.findOne({ otp: otp });
+
+  while (result) {
+    otp = otpGenerator.generate(6, {
       upperCaseAlphabets: false,
-      lowerCaseAlphabets: false,
-      specialChars: false,
     });
+  }
 
-    const result = await MobileOTP.findOne({ otp: otp });
+  const otpPayload = { contact, otp };
+  const otpBody = await MobileOTP.create(otpPayload);
+  await twilioClient.messages.create({
+    body: `Your otp for updating your Phone Number: ${otp}.`,
+    from: twilioNumber,
+    to: `+91${contact}`, // Ensure it's in international format
+  });
 
-    while (result) {
-      otp = otpGenerator.generate(6, {
-        upperCaseAlphabets: false,
-      });
-    }
-     
-    const otpPayload = { contact, otp };
-    const otpBody = await MobileOTP.create(otpPayload);
-    await twilioClient.messages.create({
-      body: `Your otp for updating your Phone Number: ${otp}.`,
-      from: twilioNumber,
-      to: `+91${contact}`, // Ensure it's in international format
-    });
-
-  try{
+  try {
     const user = await userModel.findById(userId).select("-password");
     let updatedUser;
-    if(user.role == "student") {
-      updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
-        rollNo, contact, 
-       section, branch, 
-        semester}, {new: true}).select("-password");
+    if (user.role == "student") {
+      updatedUser = await userModel.findByIdAndUpdate(userId, {
+        email, firstName: firstName, lastName: lastName,
+        rollNo, contact,
+        section, branch,
+        semester
+      }, { new: true }).select("-password");
     } else {
-      updatedUser = await userModel.findByIdAndUpdate(userId, { email, firstName : firstName, lastName : lastName, 
-         contact, exprerience,employeeId}, {new: true}).select("-password");
+      updatedUser = await userModel.findByIdAndUpdate(userId, {
+        email, firstName: firstName, lastName: lastName,
+        contact, exprerience, employeeId
+      }, { new: true }).select("-password");
     }
-    if(!updatedUser){
+    if (!updatedUser) {
       res.status(404).json({
         success: false,
         message: "User not found",
@@ -630,84 +672,84 @@ module.exports.updateProfile = async (req, res, next) => {
       employeeId: updatedUser.employeeId,
       image: updatedUser.secure_url,
     })
-  } catch(err){
-      res.status(500).json({ 
-        success: false, 
-        message: "Error updating User Profile", 
-      });
-  }  
-}
-module.exports.updateDisplayPicture = async (req, res, next) => {
- let userId = req.params.id;
-try{
-  if(userId !== req.user.id){
-    return res.status(404).send({
+  } catch (err) {
+    res.status(500).json({
       success: false,
-      message: 'User is unauthorized to check other persons data'
-    })
-  } else if (!req.files || !req.files.displayPicture) {
-    return res.status(400).json({
-      success: false,
-      message: "No file uploaded",
+      message: "Error updating User Profile",
     });
   }
-  
-  const displayPicture = req.files.displayPicture;
-  userId = new mongoose.Types.ObjectId(userId);
-  const image = await uploadImageToCloudinary(
-    displayPicture,
-    process.env.FOLDER_NAME,
-    1000,
-    1000
-  )
-  const updatedProfile = await userModel.findByIdAndUpdate(
-    userId,
-    { image: image.secure_url },
-    { new: true }
-  )
-  res.send({
-    success: true,
-    message: `Image Updated successfully`,
-    data: updatedProfile,
-  })
-} catch(err){
+}
+module.exports.updateDisplayPicture = async (req, res, next) => {
+  let userId = req.params.id;
+  try {
+    if (userId !== req.user.id) {
+      return res.status(404).send({
+        success: false,
+        message: 'User is unauthorized to check other persons data'
+      })
+    } else if (!req.files || !req.files.displayPicture) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    const displayPicture = req.files.displayPicture;
+    userId = new mongoose.Types.ObjectId(userId);
+    const image = await uploadImageToCloudinary(
+      displayPicture,
+      process.env.FOLDER_NAME,
+      1000,
+      1000
+    )
+    const updatedProfile = await userModel.findByIdAndUpdate(
+      userId,
+      { image: image.secure_url },
+      { new: true }
+    )
+    res.send({
+      success: true,
+      message: `Image Updated successfully`,
+      data: updatedProfile,
+    })
+  } catch (err) {
     return res.status(500).json({
       success: false,
       message: err.message,
-    }) 
-}
+    })
+  }
 }
 
-module.exports.contactUs = async(req, res, next) => {
-  try{
+module.exports.contactUs = async (req, res, next) => {
+  try {
     const name = req.body.name;
     const email = req.body.email;
     const feedback = req.body.feedback;
-    let userFeedback = await contactUs.findOne({email});
-    if(userFeedback){
+    let userFeedback = await contactUs.findOne({ email });
+    if (userFeedback) {
       userFeedback.feedback.push(feedback);
       await userFeedback.save();
       res.status(200).json({
-        success:true,
+        success: true,
         message: 'Feedback Sent successfully!',
       })
     }
-    else{
-    const newFeedback = await contactUs.create({
-      name,
-      email,
-      feedback:[feedback],
-    })
-    await newFeedback.save();
-    res.status(200).json({
-      success: true,
-      message: 'Feedback Sent successfully!',
-    })
-  }
-  }catch(err) {
-      res.status(500).json({
-        success: false,
-        message: "Some problem occured in processing your request",     
+    else {
+      const newFeedback = await contactUs.create({
+        name,
+        email,
+        feedback: [feedback],
       })
+      await newFeedback.save();
+      res.status(200).json({
+        success: true,
+        message: 'Feedback Sent successfully!',
+      })
+    }
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Some problem occured in processing your request",
+    })
   }
 }
