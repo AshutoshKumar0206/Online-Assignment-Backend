@@ -3,6 +3,7 @@ const Subject = require('../models/Subject'); // Ensure this path points to your
 const userModel = require('../models/User'); // Ensure this path points to your User model
 const assignmentModel = require("../models/Assignment");
 const submissionModel = require("../models/Submission");
+const Notice = require('../models/Notice');
 const fileUpload = require('express-fileupload');
 const { uploadDocsToCloudinary } = require('../utils/docsUploader');
 
@@ -91,7 +92,6 @@ module.exports.createSubject = async (req, res) => {
 module.exports.getSubject = async (req, res, next) => {
   const { id } = req.params; 
   try {
-    
     // Find the subject using the `subject_id`
     const subject = await Subject.findOne({ subject_id: id });
 
@@ -102,7 +102,6 @@ module.exports.getSubject = async (req, res, next) => {
         message: 'Subject not created. Please create the subject.',
       });
     }
-
 
     const teacherId = subject.teacher_id;
 
@@ -125,12 +124,21 @@ module.exports.getSubject = async (req, res, next) => {
       });
     }
 
-
+    // Fetch assignments
     let assignments = [];
     if (subject.assignments_id && subject.assignments_id.length > 0) {
       assignments = await assignmentModel.find({ _id: { $in: subject.assignments_id } })
-        .select('_id title deadline') // Only include ID and title
-        .lean(); // Return plain JavaScript objects
+        .select('_id title deadline')
+        .lean();
+    }
+
+    // Fetch notices with populated details
+    let notices = [];
+    if (subject.notices_id && subject.notices_id.length > 0) {
+      notices = await Notice.find({ _id: { $in: subject.notices_id } })
+        .select('message lastUpdatedAt')
+        .sort({ lastUpdatedAt: -1 }) // Sort by lastUpdatedAt in descending order
+        .lean();
     }
 
     // Construct and return the response
@@ -138,12 +146,13 @@ module.exports.getSubject = async (req, res, next) => {
       success: true,
       message: 'Subject fetched successfully.',
       subject_id: subject.subject_id,
-      subject_code: subject.subject_code, // Include the subject_code
-      subject_name: subject.subject_name, // Correctly fetch from `subject`
-      teacher_name: `${teacher.firstName} ${teacher.lastName}`, // Full teacher name
+      subject_code: subject.subject_code,
+      subject_name: subject.subject_name,
+      teacher_name: `${teacher.firstName} ${teacher.lastName}`,
       teacher_id: subject.teacher_id,
-      students: subject.students_id, // Include associated students if applicable
-      assignments: assignments.length > 0 ? assignments : [], // Include associated assignments if applicable
+      students: subject.students_id,
+      assignments: assignments.length > 0 ? assignments : [],
+      notices: notices.length > 0 ? notices : [] // Add notices to the response
     });
   } catch (err) {
     next(err);
@@ -364,5 +373,65 @@ module.exports.deleteSubject = async (req, res) => {
       message: 'Internal Server Error',
       error: error.message,
     });
+  }
+};
+
+
+// Controller for creating a new notice for a subject
+exports.createNotice = async (req, res) => {
+  try {
+      const { subjectId, message } = req.body;
+
+      // Validate request body
+      if (!subjectId || !message) {
+          return res.status(400).json({
+              success: false,
+              message: "Subject ID and message are required"
+          });
+      }
+
+      // Find subject first
+      const subject = await Subject.findOne({ subject_id: subjectId });
+      if (!subject) {
+          return res.status(404).json({
+              success: false,
+              message: "Subject not found"
+          });
+      }
+
+      // Create new notice
+      const notice = await Notice.create({
+          message,
+          subjectId: subject._id,
+          lastUpdatedAt: new Date()
+      });
+
+      // Add notice reference to subject
+      await Subject.findByIdAndUpdate(
+          subject._id,
+          {
+              $push: { notices_id: notice._id }
+          },
+          { new: true }
+      );
+
+      // Return success response
+      return res.status(201).json({
+          success: true,
+          message: "Notice created successfully",
+          notice: {
+              id: notice._id,
+              message: notice.message,
+              lastUpdatedAt: notice.lastUpdatedAt
+          }
+      });
+
+  } catch (error) {
+      console.error("Error in createNotice:", error);
+      return res.status(500).json({
+          success: false,
+          message: "Error creating notice",
+          error: error.message
+      });
   }
 };
