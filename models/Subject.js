@@ -46,6 +46,11 @@ const SubjectSchema = new mongoose.Schema({
     ref: 'Assignment', // References the Assignment model
     default: []
   },
+  notices_id: {
+    type: [mongoose.Schema.Types.ObjectId], // Array of notice IDs
+    ref: 'Notice', // References the Notice model
+    default: []
+  },
   subject_code: {
     type: String,
     required: true,
