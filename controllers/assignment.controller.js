@@ -426,7 +426,6 @@ module.exports.getAssignmentSubmission = async (req, res) => {
 module.exports.checkPlagiarism = async (req, res, next) => {
   const assignment_id = req.params.id;
   const mlUrl = process.env.NODE_URL;
-
   if (!mongoose.Types.ObjectId.isValid(assignment_id)) {
     return res.status(400).json({
       success: false,
@@ -489,6 +488,8 @@ module.exports.checkPlagiarism = async (req, res, next) => {
         { fileDetails },
         { headers: { 'Content-Type': 'application/json' } }
       );
+      console.log(mlResponse.data.rubricResults);
+      console.log(mlResponse.data.results);
     } catch (err) {
       console.log(err);
       return res.status(500).json({
@@ -496,7 +497,7 @@ module.exports.checkPlagiarism = async (req, res, next) => {
         message: 'Failed to connect to ML model',
       });
     }
-
+    
     const results = await Promise.all(
       mlResponse.data.results.map(async (response) => {
         const student1 = await userModel
@@ -533,6 +534,32 @@ module.exports.checkPlagiarism = async (req, res, next) => {
         };
       })
     );
+    
+    const rubricResults = await Promise.all(
+      mlResponse.data.rubricResults.map(async (response) => {
+        const student1 = await userModel
+          .findById(new mongoose.Types.ObjectId(response.StudentId))
+          .select('firstName lastName rollNo')
+          .exec();
+
+        return {
+          Assignment: response.Assignment,
+          CompletenessScore: response['CompletenessScore'],
+          FinalRubricScore: response['Final Rubric Score (%)'],
+          GrammarScore: response['Grammar Score'],
+          OriginalityScore: response['Originality Score'],
+          StructureScore: response['Structure Score'],
+          studentId: student1
+            ? {
+                name: `${student1.firstName} ${student1.lastName}`,
+                rollNo: student1.rollNo,
+                fileUrl: fileUrlMap[response.StudentId],
+                id: response.StudentId,
+              }
+            : { name: response.StudentId, rollNo: null, fileUrl: null, id: response.StudentId },
+        };
+      })
+    ); 
 
     const updatedSubmissions = submissions.map(submission => ({
       studentId: submission.studentId._id,
@@ -548,7 +575,7 @@ module.exports.checkPlagiarism = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: 'Submitted files sent to check Plagiarism',
-      mlResponse: { ...mlResponse.data, results },
+      mlResponse: { ...mlResponse.data, results, rubricResults },
       submitted,
       late,
       notSubmitted,
