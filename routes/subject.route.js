@@ -10,4 +10,10 @@ router.delete('/:id', isAuthenticated, subjectController.deleteSubject);
 //Route for adding new notice to the subject
 router.post('/notice', isAuthenticated, subjectController.createNotice);
 
+//Route for editing notice to the subject
+router.put('/notice', isAuthenticated, subjectController.editNotice);
+
+//Route for deleting notice to the subject
+router.delete('/notice/:id', isAuthenticated, subjectController.deleteNotice);
+
 module.exports = router;
