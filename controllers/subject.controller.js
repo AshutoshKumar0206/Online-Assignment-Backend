@@ -378,7 +378,7 @@ module.exports.deleteSubject = async (req, res) => {
 
 
 // Controller for creating a new notice for a subject
-exports.createNotice = async (req, res) => {
+module.exports.createNotice = async (req, res) => {
   try {
       const { subjectId, message } = req.body;
 
@@ -431,6 +431,109 @@ exports.createNotice = async (req, res) => {
       return res.status(500).json({
           success: false,
           message: "Error creating notice",
+          error: error.message
+      });
+  }
+};
+
+
+//controller for editing notice for a subject
+module.exports.editNotice = async (req, res) => {
+  try {
+      const { noticeId, message } = req.body;
+
+      // Validate request body
+      if (!noticeId || !message) {
+          return res.status(400).json({
+              success: false,
+              message: "Notice ID and new message are required"
+          });
+      }
+
+      // Find and update the notice
+      const updatedNotice = await Notice.findByIdAndUpdate(
+          noticeId,
+          {
+              message: message,
+              lastUpdatedAt: new Date()
+          },
+          { new: true }
+      );
+
+      // Check if notice exists
+      if (!updatedNotice) {
+          return res.status(404).json({
+              success: false,
+              message: "Notice not found"
+          });
+      }
+
+      // Return success response
+      return res.status(200).json({
+          success: true,
+          message: "Notice updated successfully",
+          notice: {
+              id: updatedNotice._id,
+              message: updatedNotice.message,
+              lastUpdatedAt: updatedNotice.lastUpdatedAt
+          }
+      });
+
+  } catch (error) {
+      console.error("Error in editNotice:", error);
+      return res.status(500).json({
+          success: false,
+          message: "Error updating notice",
+          error: error.message
+      });
+  }
+};
+
+//controller for deleting notice for a subject
+module.exports.deleteNotice = async (req, res) => {
+  try {
+      const { id } = req.params; // Notice ID from URL
+
+      // Validate notice ID
+      if (!id) {
+          return res.status(400).json({
+              success: false,
+              message: "Notice ID is required"
+          });
+      }
+
+      // Find the notice to get the subject reference
+      const notice = await Notice.findById(id);
+      if (!notice) {
+          return res.status(404).json({
+              success: false,
+              message: "Notice not found"
+          });
+      }
+
+      // Remove notice reference from subject
+      await Subject.findByIdAndUpdate(
+          notice.subjectId,
+          {
+              $pull: { notices_id: id }
+          }
+      );
+
+      // Delete the notice
+      await Notice.findByIdAndDelete(id);
+
+      // Return success response
+      return res.status(200).json({
+          success: true,
+          message: "Notice deleted successfully",
+          deletedNoticeId: id
+      });
+
+  } catch (error) {
+      console.error("Error in deleteNotice:", error);
+      return res.status(500).json({
+          success: false,
+          message: "Error deleting notice",
           error: error.message
       });
   }
