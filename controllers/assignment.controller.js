@@ -544,7 +544,7 @@ module.exports.checkPlagiarism = async (req, res, next) => {
 
         return {
           Assignment: response.Assignment,
-          CompletenessScore: response['CompletenessScore'],
+          CompletenessScore: response['Completeness Score'],
           FinalRubricScore: response['Final Rubric Score (%)'],
           GrammarScore: response['Grammar Score'],
           OriginalityScore: response['Originality Score'],
