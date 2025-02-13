@@ -11,7 +11,7 @@ router.delete('/:id', isAuthenticated, subjectController.deleteSubject);
 router.post('/notice', isAuthenticated, subjectController.createNotice);
 
 //Route for getting notice of the subject
-router.get('/notice', isAuthenticated, subjectController.getSubjectNotices);
+router.get('/notice/:subjectId', isAuthenticated, subjectController.getSubjectNotices);
 
 //Route for editing notice to the subject
 router.put('/notice', isAuthenticated, subjectController.editNotice);

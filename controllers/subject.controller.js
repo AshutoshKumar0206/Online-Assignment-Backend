@@ -542,7 +542,7 @@ module.exports.deleteNotice = async (req, res) => {
 //controller for getting notice for a subject
 module.exports.getSubjectNotices = async (req, res) => {
   try {
-      const { subjectId } = req.body;
+      const { subjectId } = req.params;
 
       // Validate subject ID
       if (!subjectId) {
