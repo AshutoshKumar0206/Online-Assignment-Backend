@@ -538,3 +538,52 @@ module.exports.deleteNotice = async (req, res) => {
       });
   }
 };
+
+//controller for getting notice for a subject
+module.exports.getSubjectNotices = async (req, res) => {
+  try {
+      const { subjectId } = req.body;
+
+      // Validate subject ID
+      if (!subjectId) {
+          return res.status(400).json({
+              success: false,
+              message: "Subject ID is required"
+          });
+      }
+
+      // Find the subject
+      const subject = await Subject.findOne({ subject_id: subjectId });
+      if (!subject) {
+          return res.status(404).json({
+              success: false,
+              message: "Subject not found"
+          });
+      }
+
+      // Fetch all notices for the subject
+      const notices = await Notice.find({ subjectId: subject._id })
+          .select('message lastUpdatedAt')
+          .sort({ lastUpdatedAt: -1 }) // Sort by latest first
+          .lean();
+
+      // Return success response
+      return res.status(200).json({
+          success: true,
+          message: "Notices fetched successfully",
+          notices: notices.map(notice => ({
+              id: notice._id,
+              message: notice.message,
+              lastUpdatedAt: notice.lastUpdatedAt
+          }))
+      });
+
+  } catch (error) {
+      console.error("Error in getSubjectNotices:", error);
+      return res.status(500).json({
+          success: false,
+          message: "Error fetching notices",
+          error: error.message
+      });
+  }
+};
