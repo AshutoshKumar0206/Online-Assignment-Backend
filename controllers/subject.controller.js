@@ -572,7 +572,7 @@ module.exports.getSubjectNotices = async (req, res) => {
           success: true,
           message: "Notices fetched successfully",
           notices: notices.map(notice => ({
-              id: notice._id,
+              _id: notice._id,
               message: notice.message,
               lastUpdatedAt: notice.lastUpdatedAt
           }))
