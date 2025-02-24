@@ -604,34 +604,34 @@ module.exports.updateProfile = async (req, res, next) => {
   //for phone number
   // contact = parseInt(contact, 10)
   // contact = contact.replace(/\D/g, "");
-  console.log(contact)
-  if (!/^\d{10,15}$/.test(contact)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid phone number format"
-    });
-  }
-  let otp = otpGenerator.generate(6, {
-    upperCaseAlphabets: false,
-    lowerCaseAlphabets: false,
-    specialChars: false,
-  });
+  // console.log(contact)
+  // if (!/^\d{10,15}$/.test(contact)) {
+  //   return res.status(400).json({
+  //     success: false,
+  //     message: "Invalid phone number format"
+  //   });
+  // }
+  // let otp = otpGenerator.generate(6, {
+  //   upperCaseAlphabets: false,
+  //   lowerCaseAlphabets: false,
+  //   specialChars: false,
+  // });
 
-  const result = await MobileOTP.findOne({ otp: otp });
+  // const result = await MobileOTP.findOne({ otp: otp });
 
-  while (result) {
-    otp = otpGenerator.generate(6, {
-      upperCaseAlphabets: false,
-    });
-  }
+  // while (result) {
+  //   otp = otpGenerator.generate(6, {
+  //     upperCaseAlphabets: false,
+  //   });
+  // }
 
-  const otpPayload = { contact, otp };
-  const otpBody = await MobileOTP.create(otpPayload);
-  await twilioClient.messages.create({
-    body: `Your otp for updating your Phone Number: ${otp}.`,
-    from: twilioNumber,
-    to: `+91${contact}`, // Ensure it's in international format
-  });
+  // const otpPayload = { contact, otp };
+  // const otpBody = await MobileOTP.create(otpPayload);
+  // await twilioClient.messages.create({
+  //   body: `Your otp for updating your Phone Number: ${otp}.`,
+  //   from: twilioNumber,
+  //   to: `+91${contact}`, // Ensure it's in international format
+  // });
 
   try {
     const user = await userModel.findById(userId).select("-password");
