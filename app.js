@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 4000;
 const { createSubject } = require("./controllers/subject.controller");
 const { app, server } =require( "./lib/socket.js");
 const notificationRoutes = require("./routes/notification.route.js");
+const feedbackRoutes = require("./routes/feedback.route.js");
 //To initialize a server
 
 
@@ -61,6 +62,7 @@ app.use("/notification", notificationRoutes);
 cloudinaryConnect();
 app.use("/assignment", assignmentRoutes);
 app.use("/subject", subjectRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 
 
