@@ -441,17 +441,17 @@ module.exports.verifyMobileOtp = async (req, res, next) => {
 module.exports.dashboard = async (req, res, next) => {
   try {
     const { id } = req.params;
-    if (id !== req.user.id) {
-      return res.status(404).send({
-        success: false,
-        message: 'User is unauthorized to check other persons data'
-      })
-    } else if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(200).json({
-        success: false,
-        message: "Invalid user ID",
-      });
-    }
+    // if (id !== req.user.id) {
+    //   return res.status(404).send({
+    //     success: false,
+    //     message: 'User is unauthorized to check other persons data'
+    //   })
+    // } else if (!mongoose.Types.ObjectId.isValid(id)) {
+    //   return res.status(200).json({
+    //     success: false,
+    //     message: "Invalid user ID",
+    //   });
+    // }
 
     const user = await userModel
       .findById(id)
