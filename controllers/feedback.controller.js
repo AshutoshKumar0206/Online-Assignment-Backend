@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const Feedback = require('../models/Feedback');
 const User = require('../models/User');
 const { uploadImageToCloudinary } = require('../utils/imageUploader')
@@ -74,7 +75,6 @@ const { uploadImageToCloudinary } = require('../utils/imageUploader')
     module.exports.getFeedbacks = async (req, res) => {
         try {
             const userId = req.params.userId;
-
             // Check if user is requesting their own feedbacks
             // if (userId !== req.user._id.toString()) {
             //     return res.status(403).json({
