@@ -493,12 +493,12 @@ module.exports.dashboard = async (req, res, next) => {
   } catch (err) {
 
     // Prevent sending another response if headers were already sent
-    if (!res.headersSent) {
+  
       res.status(500).json({
         success: false,
-        message: "Internal Server Error",
+        message: err.message,
       });
-    }
+    
 
   }
 };
