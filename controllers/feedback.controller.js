@@ -76,12 +76,12 @@ const { uploadImageToCloudinary } = require('../utils/imageUploader')
         try {
             const userId = req.params.userId;
             // Check if user is requesting their own feedbacks
-            if (userId !== req.user.id) {
-                return res.status(403).json({
-                    success: false,
-                    message: "Not authorized to view other user's feedbacks"
-                });
-            }
+            // if (userId !== req.user._id.toString()) {
+            //     return res.status(403).json({
+            //         success: false,
+            //         message: "Not authorized to view other user's feedbacks"
+            //     });
+            // }
 
             const feedbacks = await Feedback.find({ userId })
                 .populate('userId', 'name email')

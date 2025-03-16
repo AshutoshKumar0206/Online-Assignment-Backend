@@ -18,18 +18,18 @@ router.post("/sendresetotp", userController.sendresetpasswordotp);
 router.post("/resetpassword", userController.resetPassword);
 
 // User Dashboard Route
-router.get("/dashboard/:id", isAuthenticated, userController.dashboard);
-router.get("/profile/:id", isAuthenticated, userController.Profile);
-router.put("/updateprofile/:id", isAuthenticated, userController.updateProfile);
-router.put("/updatedisplaypicture/:id", isAuthenticated, userController.updateDisplayPicture);
-router.get("/getProfile/:id", isAuthenticated, userController.getProfile);
+router.get("/dashboard/:id", userController.dashboard);
+router.get("/profile/:id", userController.Profile);
+router.put("/updateprofile/:id", userController.updateProfile);
+router.put("/updatedisplaypicture/:id", userController.updateDisplayPicture);
+router.get("/getProfile/:id", userController.getProfile);
 
 //Subject Routes
-router.post("/addsubject/:id", isAuthenticated, subjectController.createSubject);
-router.get("/getsubject/:id", isAuthenticated, subjectController.getSubject);
-router.post("/addstudent/:id", isAuthenticated, subjectController.addStudent);
-router.post("/removestudent/:id", isAuthenticated, subjectController.removeStudent);
-router.post('/join/:id', isAuthenticated, subjectController.joinSubject);
+router.post("/addsubject/:id", subjectController.createSubject);
+router.get("/getsubject/:id", subjectController.getSubject);
+router.post("/addstudent/:id", subjectController.addStudent);
+router.post("/removestudent/:id", subjectController.removeStudent);
+router.post('/join/:id', subjectController.joinSubject);
 
 //ContactUs Route
 router.post("/contactus", userController.contactUs);
