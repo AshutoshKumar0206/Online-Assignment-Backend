@@ -525,9 +525,10 @@ module.exports.getProfile = async (req, res, next) => {
       image: user.image,
     });
   } catch (err) {
+    // console.log(err);
     res.status(500).json({
       success: false,
-      message: "Error fetching User Profile",
+      message: err.message,
     });
   }
 };
