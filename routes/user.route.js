@@ -14,8 +14,8 @@ router.post("/sendotp",isAuthenticated, userController.sendotp);
 router.post("/verifyotp",isAuthenticated, userController.verifyotp);
 
 //Reset Password Routes
-router.post("/sendresetotp",isAuthenticated, userController.sendresetpasswordotp);
-router.post("/resetpassword",isAuthenticated, userController.resetPassword);
+router.post("/sendresetotp", userController.sendresetpasswordotp);
+router.post("/resetpassword", userController.resetPassword);
 
 // User Dashboard Route
 router.get("/dashboard/:id",isAuthenticated, userController.dashboard);
