@@ -71,10 +71,13 @@ const otpTemplate = (otp) => {
 				<p>Dear User,</p>
 				<p>Your OTP for password reset is:</p>
 				<h2 class="highlight">${otp}</h2>
-				<p>This OTP is valid for 5 minutes.</p>
+				<p>This code is valid for 5 minutes.</p>
 			</div>
-			<div class="support">If you have any questions or need assistance, please feel free to reach out to us at <a
+			<div class="support">If you have any questions or need assistance, please reach out to us at <a
 					href="mailto:btech10160.22@bitmesra.ac.in">btech10160.22@bitmesra.ac.in</a>. We are here to help!</div>
+				<p style="color:gray; font-size:12px;">
+                This is an automated email. If you didn't request this OTP, ignore this message.
+                </p>
 		</div>
 	</body>
 	
