@@ -66,7 +66,6 @@ const otpTemplate = (otp) => {
 	
 	<body>
 		<div class="container">
-		{//To add image and anchor tag} Very Important
 			<div class="message">OTP Verification Email</div>
 			<div class="body">
 				<p>Dear User,</p>
@@ -76,8 +75,12 @@ const otpTemplate = (otp) => {
 				<p>This OTP is valid for 5 minutes. If you did not request this verification, please disregard this email.
 				Once your account is verified, you will have access to our platform and its features.</p>
 			</div>
-			<div class="support">If you have any questions or need assistance, please feel free to reach out to us at <a
-					href="mailto:btech10160.22@bitmesra.ac.in">btech10160.22@bitmesra.ac.in</a>. We are here to help!</div>
+			<div class="support">If you have any questions or need assistance, please reach out to us at <a
+					href="mailto:btech10160.22@bitmesra.ac.in">btech10160.22@bitmesra.ac.in</a>. We are here to help!
+			</div>
+			<p style="color:gray; font-size:12px;">
+                This is an automated email. If you didn't request this OTP, ignore this message.
+            </p>
 		</div>
 	</body>
 	

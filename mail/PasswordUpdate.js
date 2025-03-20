@@ -55,7 +55,6 @@ const passwordUpdateTemplate = (email, firstName, lastName) => {
     
     <body>
         <div class="container">
-            //{Put an Anchor tag here and put the link and the image of the website tag}
             <div class="message">Password Update Confirmation</div>
             <div class="body">
                 <p>Hey ${firstName + " " + lastName},</p>
@@ -63,10 +62,13 @@ const passwordUpdateTemplate = (email, firstName, lastName) => {
                 </p>
                 <p>If you did not request this password change, please contact us immediately to secure your account.</p>
             </div>
-            <div class="support">If you have any questions or need further assistance, please feel free to reach out to us
+            <div class="support">If you have any questions or need further assistance, please reach out to us
                 at
                 <a href="mailto:btech10160.22@bitmesra.ac.in">btech10160.22@bitmesra.ac.in</a>. We are here to help!
             </div>
+            <p style="color:gray; font-size:12px;">
+                This is an automated email. If you didn't request this OTP, ignore this message.
+            </p>
         </div>
     </body>
     
