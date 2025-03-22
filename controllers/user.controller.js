@@ -313,29 +313,39 @@ module.exports.sendresetpasswordotp = async (req, res) => {
       specialChars: false,
     });
 
-    const result = await OTP.findOne({ otp: otp });
-
+    // Keep generating new OTP until we get a unique one
+    let result = await OTP.findOne({ otp: otp });
     while (result) {
       otp = otpGenerator.generate(6, {
         upperCaseAlphabets: false,
+        lowerCaseAlphabets: false,
+        specialChars: false,
       });
+      result = await OTP.findOne({ otp: otp });
     }
+
+    // Delete any existing OTP for this email
+    await OTP.deleteOne({ email: email });
 
     const otpPayload = { email, otp };
     const otpBody = await OTP.create(otpPayload);
+    
     const mailResponse = await mailSender(
       email,
-      "Verification email",
+      "Password Reset OTP",
       resetTemplate(otp)
-    )
+    );
+    console.log(`mailResponse: ${mailResponse}`);
 
     res.status(200).json({
       success: true,
       message: `OTP Sent Successfully`,
-      otp,
     });
   } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
   }
 };
 
