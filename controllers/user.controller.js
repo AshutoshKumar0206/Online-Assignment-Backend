@@ -332,7 +332,8 @@ module.exports.sendresetpasswordotp = async (req, res) => {
     
     const mailResponse = await mailSender(
       email,
-      "Password Reset OTP",
+
+      "Your OTP Code for Password Reset",
       resetTemplate(otp)
     );
     console.log(`mailResponse: ${mailResponse}`);
@@ -506,7 +507,7 @@ module.exports.dashboard = async (req, res, next) => {
   
       res.status(500).json({
         success: false,
-        message: err.message,
+        message: err,
       });
     
 

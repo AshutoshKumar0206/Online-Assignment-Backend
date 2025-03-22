@@ -5,26 +5,26 @@ const { isAuthenticated } = require("../middlewares/auth.middleware"); // Move m
 
 
 // post route to create a new assignment
-router.post('/new/:id', assignmentController.createAssignment);
+router.post('/new/:id', isAuthenticated, assignmentController.createAssignment);
 
 //route to get details of an assignment
-router.get("/:id", assignmentController.getAssignmentDetails);
+router.get("/:id", isAuthenticated, assignmentController.getAssignmentDetails);
 
 //route to submit assignment of the students
-router.post("/submitassignment/:id", assignmentController.submitAssignment);
+router.post("/submitassignment/:id", isAuthenticated, assignmentController.submitAssignment);
 
 //route to change status of the  assignment
-router.put("/:id", assignmentController.changeStatus);
+router.put("/:id", isAuthenticated, assignmentController.changeStatus);
 
 //route to get all submissions of the assignment
-router.get("/submission/:id", assignmentController.getAllAssignments);
+router.get("/submission/:id", isAuthenticated, assignmentController.getAllAssignments);
 
 //route to update the assignment details
-router.put("/updateassignment/:id", assignmentController.updateAssignment);
+router.put("/updateassignment/:id", isAuthenticated, assignmentController.updateAssignment);
 
 //route to get the submission of a particular student in the assignment
-router.get("/:assignmentId/:studentId", assignmentController.getAssignmentSubmission);
-router.post("/checkplagiarism/:id", assignmentController.checkPlagiarism);
-router.post("/submission/save/:studentId/:id", assignmentController.marksAndFeedback);
+router.get("/:assignmentId/:studentId", isAuthenticated, assignmentController.getAssignmentSubmission);
+router.post("/checkplagiarism/:id", isAuthenticated, assignmentController.checkPlagiarism);
+router.post("/submission/save/:studentId/:id", isAuthenticated, assignmentController.marksAndFeedback);
 
 module.exports = router;

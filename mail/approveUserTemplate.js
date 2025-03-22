@@ -66,7 +66,6 @@ const approvedUserTemplate = (firstName, lastName, role) => {
 	
 	<body>
 		<div class="container">
-		{//To add image and anchor tag} Very Important
 			<div class="message">User Approval Mail</div>
 			<div class="body">
 				<p>Dear ${firstName + " " + lastName},</p>
@@ -74,8 +73,12 @@ const approvedUserTemplate = (firstName, lastName, role) => {
 				<h2 class="highlight">${role}</h2>
 				<p>by Admin</p>
 			</div>
-			<div class="support">If you have any questions or need assistance, please feel free to reach out to us at <a
-					href="mailto:btech10160.22@bitmesra.ac.in">btech10160.22@bitmesra.ac.in</a>. We are here to help!</div>
+			<div class="support">If you have any questions or need assistance, please reach out to us at <a
+					href="mailto:btech10160.22@bitmesra.ac.in">btech10160.22@bitmesra.ac.in</a>. We are here to help!
+			</div>
+			<p style="color:gray; font-size:12px;">
+                This is an automated email. If you didn't request this OTP, ignore this message.
+            </p>
 		</div>
 	</body>
 	
