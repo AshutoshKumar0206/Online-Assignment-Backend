@@ -10,8 +10,8 @@ router.post("/signin", userController.signin);
 router.post("/logout",isAuthenticated, userController.logout);
 
 // OTP Routes
-router.post("/sendotp",isAuthenticated, userController.sendotp);
-router.post("/verifyotp",isAuthenticated, userController.verifyotp);
+router.post("/sendotp", userController.sendotp);
+router.post("/verifyotp", userController.verifyotp);
 
 //Reset Password Routes
 router.post("/sendresetotp", userController.sendresetpasswordotp);
