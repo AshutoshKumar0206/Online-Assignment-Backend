@@ -13,37 +13,12 @@ const axios = require('axios')
 
 module.exports.createAssignment = async (req, res) => {
   const { id } = req.params; // Subject ID from route parameters
-
-  const { title, description, deadline,  minVal, maxVal } = req.body;
-  // console.log(`created by: ${createdBy}`);
-
-  if (!req.files || !req.files.file) {
-    return res.status(400).json({
-      success: false,
-      message: 'No file uploaded',
-    });
-  }
+  const { title, description, deadline, minVal, maxVal } = req.body;
 
   if (!id) {
     return res.status(400).json({
       success: false,
       message: 'Subject ID is required',
-    });
-  }
-
-  const file = req.files.file;
-
-  // Check file type
-  const allowedMimeTypes = [
-    'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'text/plain'
-  ];
-  if (!allowedMimeTypes.includes(file.mimetype)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Unsupported file type. Allowed formats: pdf, doc, docx, txt, xls, xlsx, ppt, pptx',
     });
   }
 
@@ -56,38 +31,60 @@ module.exports.createAssignment = async (req, res) => {
         message: 'Subject not found',
       });
     }
-    
-    // Step 2: Upload the file to Cloudinary
-    const folder = process.env.FOLDER_NAME;
-    const formatOptions = {
-      allowedFormats: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
-      useFilename: true,
-      resourceType: 'auto',
-    };
-    const uploadResults = await uploadDocsToCloudinary(file, folder, formatOptions);
-    const publicId = uploadResults.public_id;
-    const fileUrl = uploadResults.secure_url; 
+
+    let fileUrl = null;
+    let publicId = null;
+
+    // Step 2: Upload file to Cloudinary if provided
+    if (req.files && req.files.file) {
+      const file = req.files.file;
+
+      // Check file type
+      const allowedMimeTypes = [
+        'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'text/plain'
+      ];
+      
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Unsupported file type. Allowed formats: pdf, doc, docx, txt, xls, xlsx, ppt, pptx',
+        });
+      }
+
+      const folder = process.env.FOLDER_NAME;
+      const formatOptions = {
+        allowedFormats: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
+        useFilename: true,
+        resourceType: 'auto',
+      };
+      const uploadResults = await uploadDocsToCloudinary(file, folder, formatOptions);
+      fileUrl = uploadResults.secure_url;
+      publicId = uploadResults.public_id;
+    }
 
     // Step 3: Create the Assignment
     const newAssignment = new Assignment({
       title,
       description,
       deadline,
-
       createdBy: subject.teacher_id,
-      subjectId: subject._id, // Link assignment to the subject's `_id`
+      subjectId: subject._id,
       minVal,
       maxVal,
-      fileLink: uploadResults.secure_url,
-      filePublicId: uploadResults.public_id,
-      status:true,
+      fileLink: fileUrl,
+      filePublicId: publicId,
+      status: true,
     });
- 
+
     const savedAssignment = await newAssignment.save();
 
     // Step 4: Update the Subject's `assignments_id` field
     subject.assignments_id.push(savedAssignment._id.toString());
     await subject.save();
+
     // Step 5: Respond with success
     return res.status(201).json({
       success: true,
