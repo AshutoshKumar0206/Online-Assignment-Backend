@@ -1,5 +1,5 @@
 const express = require("express");
-// const app= express();
+const rateLimit = require("express-rate-limit"); // Import express-rate-limit
 require("dotenv").config();
 const cors = require("cors");
 const connectDB = require("./config/mongodb");
@@ -53,16 +53,27 @@ app.use(
         limits: { fileSize: 50 * 1024 * 1024 }
 	})
 )
-app.use("/", indexRoutes);
-app.use("/user", userRoutes);
-app.use("/message", messageRoutes);
-app.use("/admin", adminRoutes);
-app.use("/notification", notificationRoutes);
+
+// Configure rate limiter
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests in particular time period
+    message: "Too many requests from this IP, please try again after 15 minutes."
+});
+
+// Apply rate limiter to all requests
+app.use(limiter);
 //cloudinary connection
 cloudinaryConnect();
-app.use("/assignment", assignmentRoutes);
-app.use("/subject", subjectRoutes);
-app.use('/api/feedback', feedbackRoutes);
+
+app.use("/",limiter, indexRoutes);
+app.use("/user",limiter, userRoutes);
+app.use("/message",limiter, messageRoutes);
+app.use("/admin",limiter, adminRoutes);
+app.use("/notification",limiter, notificationRoutes);
+app.use("/assignment",limiter, assignmentRoutes);
+app.use("/subject",limiter, subjectRoutes);
+app.use('/api/feedback',limiter, feedbackRoutes);
 
 
 
