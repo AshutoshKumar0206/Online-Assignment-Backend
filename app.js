@@ -21,7 +21,7 @@ const feedbackRoutes = require("./routes/feedback.route.js");
 
 app.use(express.static('public'))
 // const allowedOrigins = ['https://online-assignment-frontend-pi.vercel.app', 'http://localhost:3000', 'http://localhost:8081']
-const allowedOrigins = ['https://online-assignment-portal-frontend.vercel.app', 'http://localhost:3000', 'http://localhost:8081', 'http://localhost:5173','https://check-plagarism.vercel.app/']
+const allowedOrigins = ['https://online-assignment-portal-frontend.vercel.app', 'http://localhost:3000', 'http://localhost:8081', 'http://localhost:5173/','https://check-plagarism.vercel.app/']
 app.use((req, res, next) =>{
     const origin = req.headers.origin;
     if(allowedOrigins.includes(origin)){
@@ -56,7 +56,7 @@ app.use(
 
 // Configure rate limiter
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 1 * 60 * 1000, // 15 minutes
     max: 100, // Limit each IP to 100 requests in particular time period
     message: "Too many requests from this IP, please try again after 15 minutes."
 });

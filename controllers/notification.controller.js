@@ -36,7 +36,7 @@ module.exports.createNotification = async(req,res) => {
             const notifications = await Notification.find({ receiverId: req.params.userId })
               .populate("senderId", "_id firstName lastName")
               .sort({ createdAt: -1 });
-    
+              
             // Mark notifications as "read"
             await Notification.updateMany(
                 { receiverId: req.params.userId, status: "unread" },
