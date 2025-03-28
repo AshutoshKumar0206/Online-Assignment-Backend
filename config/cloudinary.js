@@ -12,6 +12,10 @@ exports.cloudinaryConnect = () => {
   .then(result => console.log(result))
   .catch(error => console.error(error));
 	} catch (error) {
-		console.log(error);
+		// console.log(error);
+		res.status(500).json({
+			success:false,
+			message:"Error in connecting to Cloudinary"
+	})
 	}
 };

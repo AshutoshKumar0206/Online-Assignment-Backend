@@ -11,7 +11,7 @@ exports.uploadDocsToCloudinary = async (file, folder, formatOptions = {}) => {
   const allowedExtensions = ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'];
   // Extract the file extension
   const fileExtension = file.name.split('.').pop().toLowerCase();
-  console.log('kya be kaise ho', fileExtension);
+  // console.log('kya be kaise ho', fileExtension);
 
   // Validate file extension
   if (!allowedExtensions.includes(fileExtension)) {
@@ -35,12 +35,12 @@ exports.uploadDocsToCloudinary = async (file, folder, formatOptions = {}) => {
   try {
     // Upload the file to Cloudinary
     const uploadedDocs = await cloudinary.uploader.upload(file.tempFilePath, options);
-    console.log('Uploaded Docs:', uploadedDocs);
+    // console.log('Uploaded Docs:', uploadedDocs);
 
     // Return the result to the calling function
     return uploadedDocs;
   } catch (err) {
-    console.error('Error uploading to Cloudinary:', err);
+    // console.error('Error uploading to Cloudinary:', err);
     throw new Error(err.message || 'Error uploading to Cloudinary');
   }
 };

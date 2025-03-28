@@ -206,7 +206,7 @@ module.exports.sendotp = async (req, res) => {
       "Verification email",
       emailTemplate(otp)
     )
-    console.log("mail response:", mailResponse);
+    // console.log("mail response:", mailResponse);
 
     res.status(200).json({
       success: true,
@@ -214,7 +214,7 @@ module.exports.sendotp = async (req, res) => {
       otp,
     });
   } catch (error) {
-    console.log(error.message);
+    // console.log(error.message);
     return res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -336,7 +336,7 @@ module.exports.sendresetpasswordotp = async (req, res) => {
       "Your OTP Code for Password Reset",
       resetTemplate(otp)
     );
-    console.log(`mailResponse: ${mailResponse}`);
+    // console.log(`mailResponse: ${mailResponse}`);
 
     res.status(200).json({
       success: true,

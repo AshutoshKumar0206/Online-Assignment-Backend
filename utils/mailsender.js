@@ -17,11 +17,15 @@ const mailsender = async (email, title, body) => {
                 subject: `${title}`,
                 html: `${body}`,
             })
-            console.log('hello',info);
+            // console.log('hello',info);
             return { info };
     }
     catch(error) {
-        console.log(error.message);
+        res.status(500).json({
+			success:false,
+			message:"Internal Server Error" 
+	})
+        // console.log(error.message);
     }
 }
 
