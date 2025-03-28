@@ -137,6 +137,7 @@ module.exports.approveUser = async (req, res, next) => {
       email: currUser.email,
       password: currUser.password,
       role,
+      rollNo: currUser.rollNo,
     });
 
     await approvedUser.save();

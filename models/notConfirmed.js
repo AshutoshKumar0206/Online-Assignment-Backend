@@ -28,6 +28,10 @@ const NotConfirmedSchema = new mongoose.Schema({
       type: Date,
       default: Date.now,
     },
+    rollNo:{
+      type: String,
+      default: 'BTECH/XXXXX/XX',
+    },
   });
   
   module.exports = mongoose.model("NotConfirmed", NotConfirmedSchema);

@@ -26,12 +26,19 @@ const axios = require('axios')
 
 module.exports.signup = async (req, res, next) => {
   try {
-    const { firstName, lastName, email, password, confirmPassword, role, recaptchaToken } = req.body;
+    const { firstName, lastName, email, password, confirmPassword, role,rollNo, recaptchaToken } = req.body;
     if (!email || !password || !confirmPassword || !firstName || !lastName) {
       return res.status(400).json({
         message: "All fields are required",
       });
     }
+    
+    if(role == "student" && !rollNo) {
+      return res.status(400).json({
+        success: false,
+        message: "Roll number is required for students."
+      });
+    } 
 
     // Password validation regex
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*])[A-Za-z\d@#$%^&*]{8,}$/;
@@ -83,6 +90,7 @@ module.exports.signup = async (req, res, next) => {
       email,
       password: hashedPassword,
       role,
+      rollNo,
     });
 
     await newUser.save();
