@@ -45,7 +45,7 @@ const { uploadImageToCloudinary } = require('../utils/imageUploader')
             await feedback.save();
             res.status(201).json({ success: true, data: feedback });
         } catch (error) {
-            console.log(error);
+           //console.log(error);
             res.status(400).json({ success: false, error: error.message });
         }
     },

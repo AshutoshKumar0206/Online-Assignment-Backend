@@ -134,7 +134,7 @@ module.exports.getAssignmentDetails = async (req, res, next) => {
 //route to change status of the  assignment
 module.exports.changeStatus = async (req, res) => {
   const { id } = req.params; // Assignment ID from route parameters
-  console.log(id);
+  // console.log(id);
 
   if (!id) {
     return res.status(400).json({
@@ -262,7 +262,7 @@ module.exports.submitAssignment = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.status(500).json({
       success: false,
       message: 'Failed to submit assignment',
@@ -343,7 +343,7 @@ module.exports.getAllAssignments = async (req, res) => {
       notSubmitted,
     });
   } catch (err) {
-    console.log(err);
+    //console.log(err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -394,7 +394,7 @@ module.exports.getAssignmentSubmission = async (req, res) => {
   try {
     // Find the submission with the given assignmentId and studentId
     const submission = await Submission.findOne({ assignmentId, studentId });
-    console.log(submission);
+    //console.log(submission);
 
     if (!submission) {
       return res.status(404).json({
@@ -485,10 +485,10 @@ module.exports.checkPlagiarism = async (req, res, next) => {
         { fileDetails },
         { headers: { 'Content-Type': 'application/json' } }
       );
-      console.log(mlResponse.data.rubricResults);
-      console.log(mlResponse.data.results);
+      // console.log(mlResponse.data.rubricResults);
+      // console.log(mlResponse.data.results);
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return res.status(500).json({
         success: false,
         message: 'Failed to connect to ML model',
@@ -606,7 +606,7 @@ module.exports.marksAndFeedback = async (req, res, next) => {
     });
 
   } catch(err){
-    console.log(err);
+    // console.log(err);
     res.status(500).json({
       success: false,
       message: 'Internal server error',

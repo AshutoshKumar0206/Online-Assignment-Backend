@@ -221,7 +221,7 @@ module.exports.removeStudent = async (req, res, next) => {
   let subjectId = req.params.id;
   let studentId = req.body.studentId;
   const email = req.body.studentEmail;
-  console.log("a remove student request is received", subjectId, studentId, email);
+  //console.log("a remove student request is received", subjectId, studentId, email);
 
   try {
     // Find the subject by subject_id
@@ -367,7 +367,7 @@ module.exports.deleteSubject = async (req, res) => {
       message: 'Subject and its related data deleted successfully.',
     });
   } catch (error) {
-    console.error('Error deleting subject:', error);
+    //console.error('Error deleting subject:', error);
     res.status(500).json({
       success: false,
       message: 'Internal Server Error',
@@ -427,7 +427,7 @@ module.exports.createNotice = async (req, res) => {
       });
 
   } catch (error) {
-      console.error("Error in createNotice:", error);
+      //console.error("Error in createNotice:", error);
       return res.status(500).json({
           success: false,
           message: "Error creating notice",
@@ -480,7 +480,7 @@ module.exports.editNotice = async (req, res) => {
       });
 
   } catch (error) {
-      console.error("Error in editNotice:", error);
+      //console.error("Error in editNotice:", error);
       return res.status(500).json({
           success: false,
           message: "Error updating notice",
@@ -530,7 +530,7 @@ module.exports.deleteNotice = async (req, res) => {
       });
 
   } catch (error) {
-      console.error("Error in deleteNotice:", error);
+      //console.error("Error in deleteNotice:", error);
       return res.status(500).json({
           success: false,
           message: "Error deleting notice",
@@ -579,7 +579,7 @@ module.exports.getSubjectNotices = async (req, res) => {
       });
 
   } catch (error) {
-      console.error("Error in getSubjectNotices:", error);
+      //console.error("Error in getSubjectNotices:", error);
       return res.status(500).json({
           success: false,
           message: "Error fetching notices",

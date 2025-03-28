@@ -17,7 +17,7 @@ module.exports.getMessages = async (req, res) => {
   
       res.status(200).json(messages);
     } catch (error) {
-      console.log("Error in getMessages controller: ", error.message);
+      //console.log("Error in getMessages controller: ", error.message);
       res.status(500).json({ error: "Internal server error" });
     }
   };
@@ -27,9 +27,9 @@ module.exports.sendMessage = async (req, res) => {
       const { text, image } = req.body;
       const {  id:receiverId } = req.params;
       const senderId = req.body.senderId;
-      console.log("receiverId");
-      console.log(receiverId);
-      console.log(`senderId: ${senderId}`);
+      // console.log("receiverId");
+      // console.log(receiverId);
+      // console.log(`senderId: ${senderId}`);
       
       let imageUrl;
       if (image) {
@@ -55,7 +55,7 @@ module.exports.sendMessage = async (req, res) => {
   
       res.status(201).json(newMessage);
     } catch (error) {
-      console.log("Error in sendMessage controller: ", error.message);
+      //console.log("Error in sendMessage controller: ", error.message);
       res.status(500).json({ error: "Internal server error" });
     }
   };
@@ -64,10 +64,10 @@ module.exports.sendMessage = async (req, res) => {
     try {
       const { id } = req.params; 
       const userId = req.user.id; 
-      console.log(`userId: ${userId}`);
+      //console.log(`userId: ${userId}`);
   
       const message = await Message.findById(id);
-      console.log(`messageId: ${message.senderId}`);
+      //console.log(`messageId: ${message.senderId}`);
   
       if (!message) {
         return res.status(404).json({ error: "Message not found" });
@@ -121,7 +121,7 @@ module.exports.sendMessage = async (req, res) => {
   
       res.status(200).json(userList);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      //console.error('Error fetching users:', error);
       res.status(500).json({ error: 'Server error' });
     }
   };
@@ -138,7 +138,7 @@ module.exports.sendMessage = async (req, res) => {
   
       res.status(200).json({ message: 'Messages marked as read' });
     } catch (error) {
-      console.error('Error marking messages as read:', error);
+      //console.error('Error marking messages as read:', error);
       res.status(500).json({ error: 'Server error' });
     }
   }
