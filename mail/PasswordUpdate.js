@@ -1,5 +1,5 @@
 const passwordUpdateTemplate = (email, firstName, lastName) => {
-	return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
     <html>
     
     <head>
@@ -15,7 +15,6 @@ const passwordUpdateTemplate = (email, firstName, lastName) => {
                 margin: 0;
                 padding: 0;
             }
-    
     
             .container {
                 max-width: 600px;
@@ -57,17 +56,16 @@ const passwordUpdateTemplate = (email, firstName, lastName) => {
         <div class="container">
             <div class="message">Password Update Confirmation</div>
             <div class="body">
-                <p>Hey ${firstName + " " + lastName},</p>
-                <p>Your password has been successfully updated for the email <span class="highlight">${email}</span>.
-                </p>
-                <p>If you did not request this password change, please contact us immediately to secure your account.</p>
+                <p>Dear ${firstName} ${lastName},</p>
+                <p>Your password for the email account <span class="highlight">${email}</span> has been successfully updated.</p>
+                <p>If you did not request this change, please contact our support team immediately to secure your account.</p>
             </div>
-            <div class="support">If you have any questions or need further assistance, please reach out to us
-                at
-                <a href="mailto:btech10160.22@bitmesra.ac.in">btech10160.22@bitmesra.ac.in</a>. We are here to help!
+            <div class="support">
+                For further assistance, please email us at 
+                <a href="mailto:btech10160.22@bitmesra.ac.in">btech10160.22@bitmesra.ac.in</a>.
             </div>
             <p style="color:gray; font-size:12px;">
-                This is an automated email. If you didn't request this OTP, ignore this message.
+                This is an automated notification. Please do not reply to this email.
             </p>
         </div>
     </body>
