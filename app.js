@@ -64,7 +64,7 @@ const limiter = rateLimit({
 // Apply rate limiter to all requests
 app.use(limiter);
 //cloudinary connection
-cloudinaryConnect();
+// cloudinaryConnect();
 
 app.use("/",limiter, indexRoutes);
 app.use("/user",limiter, userRoutes);
@@ -78,5 +78,5 @@ app.use('/api/feedback',limiter, feedbackRoutes);
 
 
 server.listen(PORT, () => {
-    // console.log(`server is running on port ${PORT}`);
+    console.log(`server is running on port ${PORT}`);
 })

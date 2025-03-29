@@ -59,9 +59,8 @@ module.exports.signup = async (req, res, next) => {
     }
 
     const isUserAlreadyExist = await userModel.findOne({ email });
-    const isPendingUser = await notConfirmedModel.findOne({ email });
 
-    if (isUserAlreadyExist || isPendingUser) {
+    if (isUserAlreadyExist ) {
       return res.status(400).json({
         success: false,
         message: "User already exists or requires Admin approval.",
