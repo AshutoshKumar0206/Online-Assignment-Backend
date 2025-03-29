@@ -64,19 +64,19 @@ const limiter = rateLimit({
 // Apply rate limiter to all requests
 app.use(limiter);
 //cloudinary connection
-cloudinaryConnect();
+// cloudinaryConnect();
 
-app.use("/",limiter, indexRoutes);
-app.use("/user",limiter, userRoutes);
-app.use("/message",limiter, messageRoutes);
-app.use("/admin",limiter, adminRoutes);
-app.use("/notification",limiter, notificationRoutes);
-app.use("/assignment",limiter, assignmentRoutes);
-app.use("/subject",limiter, subjectRoutes);
-app.use('/api/feedback',limiter, feedbackRoutes);
+app.use("/", indexRoutes);
+app.use("/user", userRoutes);
+app.use("/message", messageRoutes);
+app.use("/admin", adminRoutes);
+app.use("/notification", notificationRoutes);
+app.use("/assignment", assignmentRoutes);
+app.use("/subject", subjectRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 
 
 server.listen(PORT, () => {
-    // console.log(`server is running on port ${PORT}`);
+    console.log(`server is running on port ${PORT}`);
 })
