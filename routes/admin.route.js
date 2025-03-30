@@ -1,45 +1,34 @@
 const express = require("express");
 const router = express.Router();
-const { 
-  adminLogin, 
-  adminLogout, 
-  verifyAdmin, 
-  getPendingUsers, 
-  approveUser,
-  deletePendingUser,
-  getUser,
-  deleteUser,
-  viewUser,
-  getFeedback
-} = require("../controllers/admin.controller");
+const adminController = require("../controllers/admin.controller");
 
-// Admin Login and Logout Routes
+
 // Route for Admin login, returns token and pending users upon successful login
-router.post("/signin", adminLogin);
+router.post("/signin", adminController.adminLogin);
 
 // Route for Admin logout, clears the token and logs out the admin
-router.post("/logout", verifyAdmin, adminLogout);
+router.post("/logout", adminController.verifyAdmin, adminController.adminLogout);
 
 // Admin Routes for Pending Users
 // Route to fetch pending users (only accessible by verified admins)
-router.get("/check", verifyAdmin, getPendingUsers);
+router.get("/check", adminController.verifyAdmin, adminController.getPendingUsers);
 
 // Route to approve a pending user (only accessible by verified admins)
-router.post("/approve", verifyAdmin, approveUser);
+router.post("/approve", adminController.verifyAdmin, adminController.approveUser);
 
 //Route to delete pending users
-router.delete("/deletependinguser/:id", verifyAdmin, deletePendingUser);
+router.delete("/deletependinguser/:id", adminController.verifyAdmin, adminController.deletePendingUser);
 
 //Route to get all the existing users
-router.get("/user", verifyAdmin, getUser);
+router.get("/user", adminController.verifyAdmin, adminController.getUser);
 
 //Route to delete a particular user (only accessible to verified admins)
-router.delete('/user/:id', verifyAdmin, deleteUser);
+router.delete('/user/:id', adminController.verifyAdmin, adminController.deleteUser);
 
 //Route to get details of a particular user (only accessible to verified admins)
-router.get("/user/:id", verifyAdmin, viewUser);
+router.get("/user/:id", adminController.verifyAdmin, adminController.viewUser);
 
 //Feedback Fetch Route
-router.get("/feedback", verifyAdmin, getFeedback);
+router.get("/feedback", adminController.verifyAdmin, adminController.getFeedback);
 
 module.exports = router;
