@@ -6,12 +6,10 @@ const bcrypt = require("bcrypt");
 const BlacklistModel = require("../models/blacklist.model");
 const otpGenerator = require("otp-generator");
 const OTP = require("../models/Otp");
-const MobileOTP = require("../models/MobileOtp");
 const emailTemplate = require("../mail/emailVerificationTemplate");
 const resetTemplate = require("../mail/resetPassOtp")
 const mailSender = require("../utils/mailsender");
 const passwordUpdateTemplate = require("../mail/PasswordUpdate");
-const Subject = require('../models/Subject');
 const contactUs = require('../models/ContactUs');
 const mongoose = require('mongoose');
 const { uploadImageToCloudinary } = require('../utils/imageUploader')
@@ -40,6 +38,14 @@ module.exports.signup = async (req, res, next) => {
       });
     } 
 
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Password and confirm password do not match.",
+      });
+    }
+
+
     // Password validation regex
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*])[A-Za-z\d@#$%^&*]{8,}$/;
     // Check if password meets the criteria
@@ -51,21 +57,7 @@ module.exports.signup = async (req, res, next) => {
       });
     }
 
-    if (password !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Password and confirm password do not match.",
-      });
-    }
-
-    const isUserAlreadyExist = await userModel.findOne({ email });
-
-    if (isUserAlreadyExist ) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exists or requires Admin approval.",
-      });
-    }
+    //verifying the recaptch
     const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
     const response = await axios.post(
       verifyUrl,
@@ -74,6 +66,17 @@ module.exports.signup = async (req, res, next) => {
         response: recaptchaToken
       })
     );
+
+    
+    const isUserAlreadyExist = await userModel.findOne({ email });
+
+    if (isUserAlreadyExist ) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists or requires Admin approval.",
+      });
+    }
+    
     if (!response.data.success) {
       return res.status(403).json({
         success: false,
@@ -198,13 +201,6 @@ module.exports.sendotp = async (req, res) => {
       specialChars: false,
     });
 
-    const result = await OTP.findOne({ otp: otp });
-
-    while (result) {
-      otp = otpGenerator.generate(6, {
-        upperCaseAlphabets: false,
-      });
-    }
 
     const otpPayload = { email, otp };
     const otpBody = await OTP.create(otpPayload);
@@ -218,7 +214,6 @@ module.exports.sendotp = async (req, res) => {
     res.status(200).json({
       success: true,
       message: `OTP Sent Successfully`,
-      otp,
     });
   } catch (error) {
     // console.log(error.message);
@@ -321,19 +316,6 @@ module.exports.sendresetpasswordotp = async (req, res) => {
       specialChars: false,
     });
 
-    // Keep generating new OTP until we get a unique one
-    let result = await OTP.findOne({ otp: otp });
-    while (result) {
-      otp = otpGenerator.generate(6, {
-        upperCaseAlphabets: false,
-        lowerCaseAlphabets: false,
-        specialChars: false,
-      });
-      result = await OTP.findOne({ otp: otp });
-    }
-
-    // Delete any existing OTP for this email
-    await OTP.deleteOne({ email: email });
 
     const otpPayload = { email, otp };
     const otpBody = await OTP.create(otpPayload);
@@ -368,11 +350,22 @@ exports.resetPassword = async (req, res) => {
         message: "OTP and email are required",
       });
     }
+
+    if (confirmPassword !== password) {
+      return res.json({
+        success: false,
+        message: "Password and Confirm Password does not Match",
+      });
+    }
+    
     //check if otp matches with otp send on mail
     const otpEntry = await OTP.findOne({ email, otp });
     if (!otpEntry) {
       return res.status(401).json({ message: "Invalid OTP." });
     }
+
+    // Delete OTP for this email
+    await OTP.deleteOne({ email: email });
 
     // Password validation regex
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*])[A-Za-z\d@#$%^&*]{8,}$/;
@@ -386,12 +379,7 @@ exports.resetPassword = async (req, res) => {
       });
     }
 
-    if (confirmPassword !== password) {
-      return res.json({
-        success: false,
-        message: "Password and Confirm Password does not Match",
-      });
-    }
+    
     const userDetails = await userModel.findOne({ email: email });
     if (!userDetails) {
       return res.json({

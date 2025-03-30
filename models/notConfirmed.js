@@ -1,4 +1,3 @@
-// models/NotConfirmed.js
 const mongoose = require("mongoose");
 
 const NotConfirmedSchema = new mongoose.Schema({
@@ -32,7 +31,8 @@ const NotConfirmedSchema = new mongoose.Schema({
       type: String,
       default: 'BTECH/XXXXX/XX',
     },
-  });
-  
-  module.exports = mongoose.model("NotConfirmed", NotConfirmedSchema);
-  
+});
+
+NotConfirmedSchema.index({ createdAt: 1 }, { expireAfterSeconds: 300 });
+
+module.exports = mongoose.model("NotConfirmed", NotConfirmedSchema);

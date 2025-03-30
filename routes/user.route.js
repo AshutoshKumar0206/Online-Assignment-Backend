@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/user.controller");
 const subjectController = require("../controllers/subject.controller");
-const { isAuthenticated } = require("../middlewares/auth.middleware"); // Move middleware to a separate file for modularity
+const { isAuthenticated } = require("../middlewares/auth.middleware"); 
 
 // User Authentication Routes
 router.post("/signup", userController.signup);
