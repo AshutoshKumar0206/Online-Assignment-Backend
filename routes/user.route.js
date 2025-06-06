@@ -32,6 +32,6 @@ router.post("/removestudent/:id",isAuthenticated, subjectController.removeStuden
 router.post('/join/:id',isAuthenticated, subjectController.joinSubject);
 
 //ContactUs Route
-router.post("/contactus",isAuthenticated, userController.contactUs);
+router.post("/contactus", userController.contactUs);
 
 module.exports = router;
