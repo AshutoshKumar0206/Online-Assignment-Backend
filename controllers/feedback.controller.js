@@ -119,14 +119,20 @@ const { uploadImageToCloudinary } = require('../utils/imageUploader')
         }
     };
 
-    // Update feedback status (admin only)
-    module.exports.updateFeedbackStatus= async (req, res) => {
+    // Update feedback status and response (admin only)
+    module.exports.updateFeedbackStatus = async (req, res) => {
         try {
+            const { status, response } = req.body; // Include response in the request body
+            const updateFields = { status };
 
-            const { status } = req.body;
+            // Add response to the update fields if provided
+            if (response) {
+                updateFields.response = response;
+            }
+
             const feedback = await Feedback.findByIdAndUpdate(
                 req.params.id,
-                { status },
+                updateFields,
                 { new: true }
             ).populate('userId', 'name email');
 
