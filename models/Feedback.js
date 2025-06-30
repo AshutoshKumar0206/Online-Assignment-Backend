@@ -28,7 +28,12 @@ const feedbackSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
-    }
+    }, 
+    response: {
+        type: String,
+        trim: true,
+        default: ''
+    },
 });
 
 function arrayLimit(val) {
