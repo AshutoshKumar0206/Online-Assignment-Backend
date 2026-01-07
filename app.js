@@ -58,7 +58,7 @@ app.use(limiter);
 // 3. Database Connection
 // ---------------------------------------------------------
 connectDB();
-// cloudinaryConnect(); // Uncomment if needed
+cloudinaryConnect(); // Uncomment if needed
 
 // ---------------------------------------------------------
 // 4. Routes
