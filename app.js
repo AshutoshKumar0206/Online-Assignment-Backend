@@ -1,71 +1,68 @@
 const express = require("express");
-const rateLimit = require("express-rate-limit"); // Import express-rate-limit
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 const cors = require("cors");
-const connectDB = require("./config/mongodb");
-const {cloudinaryConnect } = require("./config/cloudinary");
 const fileUpload = require("express-fileupload");
+
+// Database & Config
+const connectDB = require("./config/mongodb");
+const { cloudinaryConnect } = require("./config/cloudinary");
+
+// Routes
 const indexRoutes = require("./routes/index.route");
 const userRoutes = require("./routes/user.route");
 const adminRoutes = require("./routes/admin.route");
 const messageRoutes = require("./routes/message.route.js");
 const assignmentRoutes = require("./routes/assignment.route");
 const subjectRoutes = require("./routes/subject.route.js");
-const PORT = process.env.PORT || 4000;
-const { createSubject } = require("./controllers/subject.controller");
-const { app, server } =require( "./lib/socket.js");
 const notificationRoutes = require("./routes/notification.route.js");
 const feedbackRoutes = require("./routes/feedback.route.js");
-//To initialize a server
 
+// Socket & App Initialization
+const { app, server } = require("./lib/socket.js");
+const PORT = process.env.PORT || 4000;
 
-app.use(express.static('public'))
-// const allowedOrigins = ['https://online-assignment-frontend-pi.vercel.app', 'http://localhost:3000', 'http://localhost:8081']
-const allowedOrigins = ['https://online-assignment-portal-frontend.vercel.app', 'http://localhost:3000', 'http://localhost:8081', 'http://localhost:5173/','https://check-plagarism.vercel.app/']
-app.use((req, res, next) =>{
-    const origin = req.headers.origin;
-    if(allowedOrigins.includes(origin)){
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    }   
-    res.header(
-        'Access-Control-Allow-Methods', 
-        'Origin, X-Requested-With, Content-Type, Accept'
-    );
-    next(); 
-})
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*'); // allow all domains
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-});
-//MongoDb Connection
-connectDB();
+// ---------------------------------------------------------
+// 1. CORS Configuration (Allows ALL sites)
+// ---------------------------------------------------------
+app.use(cors({
+    origin: "*", 
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"]
+}));
 
+// ---------------------------------------------------------
+// 2. Middleware setup
+// ---------------------------------------------------------
+app.use(express.static('public'));
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(
     fileUpload({
-        useTempFiles:true,
-		tempFileDir:"/tmp",
+        useTempFiles: true,
+        tempFileDir: "/tmp",
         limits: { fileSize: 50 * 1024 * 1024 }
-	})
-)
+    })
+);
 
 // Configure rate limiter
 const limiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests in particular time period
-    message: "Too many requests from this IP, please try again after 15 minutes."
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 100, // Limit each IP to 100 requests per minute
+    message: "Too many requests from this IP, please try again after a minute."
 });
-
-// Apply rate limiter to all requests
 app.use(limiter);
-//cloudinary connection
-// cloudinaryConnect();
 
+// ---------------------------------------------------------
+// 3. Database Connection
+// ---------------------------------------------------------
+connectDB();
+// cloudinaryConnect(); // Uncomment if needed
+
+// ---------------------------------------------------------
+// 4. Routes
+// ---------------------------------------------------------
 app.use("/", indexRoutes);
 app.use("/user", userRoutes);
 app.use("/message", messageRoutes);
@@ -75,8 +72,9 @@ app.use("/assignment", assignmentRoutes);
 app.use("/subject", subjectRoutes);
 app.use('/api/feedback', feedbackRoutes);
 
-
-
+// ---------------------------------------------------------
+// 5. Start Server
+// ---------------------------------------------------------
 server.listen(PORT, () => {
-    console.log(`server is running on port ${PORT}`);
-})
+    console.log(`Server is running on port ${PORT}`);
+});
