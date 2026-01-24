@@ -58,14 +58,14 @@ module.exports.signup = async (req, res, next) => {
     }
 
     //verifying the recaptch
-    const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
-    const response = await axios.post(
-      verifyUrl,
-      new URLSearchParams({
-        secret: RECAPTCHA_SECRET_KEY,
-        response: recaptchaToken
-      })
-    );
+    // const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
+    // const response = await axios.post(
+    //   verifyUrl,
+    //   new URLSearchParams({
+    //     secret: RECAPTCHA_SECRET_KEY,
+    //     response: recaptchaToken
+    //   })
+    // );
 
     
     const isUserAlreadyExist = await userModel.findOne({ email });
@@ -77,12 +77,12 @@ module.exports.signup = async (req, res, next) => {
       });
     }
     
-    if (!response.data.success) {
-      return res.status(403).json({
-        success: false,
-        message: "reCAPTCHA verification failed. Please try again.",
-      });
-    }
+    // if (!response.data.success) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: "reCAPTCHA verification failed. Please try again.",
+    //   });
+    // }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
