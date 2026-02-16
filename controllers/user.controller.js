@@ -57,17 +57,6 @@ module.exports.signup = async (req, res, next) => {
       });
     }
 
-    //verifying the recaptch
-    // const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
-    // const response = await axios.post(
-    //   verifyUrl,
-    //   new URLSearchParams({
-    //     secret: RECAPTCHA_SECRET_KEY,
-    //     response: recaptchaToken
-    //   })
-    // );
-
-    
     const isUserAlreadyExist = await userModel.findOne({ email });
 
     if (isUserAlreadyExist ) {
@@ -76,13 +65,6 @@ module.exports.signup = async (req, res, next) => {
         message: "User already exists or requires Admin approval.",
       });
     }
-    
-    // if (!response.data.success) {
-    //   return res.status(403).json({
-    //     success: false,
-    //     message: "reCAPTCHA verification failed. Please try again.",
-    //   });
-    // }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -118,26 +100,10 @@ module.exports.signin = async (req, res, next) => {
       });
     }
     if (failedAttempts >= 3) {
-      if (!recaptchaToken) {
-        return res.status(401).json({
-          success: false,
-          message: "Please complete the reCAPTCHA verification.",
-        });
-      }
-      const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
-      const response = await axios.post(
-        verifyUrl,
-        new URLSearchParams({
-          secret: RECAPTCHA_SECRET_KEY,
-          response: recaptchaToken
-        })
-      );
-      if (!response.data.success) {
-        return res.status(403).json({
-          success: false,
-          message: "reCAPTCHA verification failed. Please try again.",
-        });
-      }
+      return res.status(401).json({
+        success: false,
+        message: "Too many failed attempts. Please try again later.",
+      });
     }
 
     const user = await userModel.findOne({ email });
