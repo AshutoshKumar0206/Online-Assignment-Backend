@@ -182,7 +182,8 @@ module.exports.sendotp = async (req, res) => {
       message: `OTP Sent Successfully`,
     });
   } catch (error) {
-    // console.log(error.message);
+    console.log(error.message);
+    console.log("Headers already sent?", res.headersSent);
     return res.status(500).json({ success: false, error: error.message });
   }
 };
