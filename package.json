@@ -4,7 +4,10 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "build": "react-scripts build"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +26,7 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.10.1",
     "otp-generator": "^4.0.1",
+    "react-scripts": "^5.0.1",
     "socket.io": "^4.8.1",
     "twilio": "^5.6.1"
   }
