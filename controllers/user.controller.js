@@ -174,6 +174,7 @@ module.exports.sendotp = async (req, res) => {
       email,
       "Verification email",
       emailTemplate(otp),
+      req,
       res
     )
     // console.log("mail response:", mailResponse);
