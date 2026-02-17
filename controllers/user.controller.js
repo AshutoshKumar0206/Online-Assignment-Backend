@@ -173,9 +173,10 @@ module.exports.sendotp = async (req, res) => {
     const mailResponse = await mailSender(
       email,
       "Verification email",
-      emailTemplate(otp)
+      emailTemplate(otp),
+      res
     )
-    console.log("mail response:", mailResponse);
+    // console.log("mail response:", mailResponse);
 
     res.status(200).json({
       success: true,
