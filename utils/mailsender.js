@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 require("dotenv").config();
-const mailsender = async (email, title, body, req, res) => {
+const mailsender = async (email, title, body) => {
     try{
             let transporter = nodemailer.createTransport({
                 host:process.env.MAIL_HOST,
@@ -21,10 +21,7 @@ const mailsender = async (email, title, body, req, res) => {
             return { info };
     }
     catch(error) {
-        res.status(500).json({
-			success:false,
-			message:"Internal Server Error" 
-	})
+       throw error;
         // console.log(error.message);
     }
 }
