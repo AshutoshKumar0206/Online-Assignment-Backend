@@ -177,7 +177,7 @@ module.exports.sendotp = async (req, res) => {
     )
     // console.log("mail response:", mailResponse);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `OTP Sent Successfully`,
     });
