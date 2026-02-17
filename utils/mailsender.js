@@ -21,10 +21,7 @@ const mailsender = async (email, title, body) => {
             return { info };
     }
     catch(error) {
-        res.status(500).json({
-			success:false,
-			message:"Internal Server Error" 
-	})
+       throw error;
         // console.log(error.message);
     }
 }
