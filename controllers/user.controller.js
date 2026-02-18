@@ -22,7 +22,7 @@ const RECAPTCHA_SECRET_KEY = process.env.CAPTCHA_SECRET;
 require('dotenv').config();
 const axios = require('axios')
 
-module.exports.signup = async (req, res, next) => {
+export const signup = async (req, res, next) => {
   try {
     const { firstName, lastName, email, password, confirmPassword, role,rollNo, recaptchaToken } = req.body;
     if (!email || !password || !confirmPassword || !firstName || !lastName) {
@@ -89,7 +89,7 @@ module.exports.signup = async (req, res, next) => {
   }
 };
 
-module.exports.signin = async (req, res, next) => {
+export const signin = async (req, res, next) => {
   try {
     const { email, password, recaptchaToken, failedAttempts } = req.body;
 
@@ -148,7 +148,7 @@ module.exports.signin = async (req, res, next) => {
   }
 };
 
-module.exports.sendotp = async (req, res) => {
+export const sendotp = async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -189,7 +189,7 @@ module.exports.sendotp = async (req, res) => {
 };
 
 
-module.exports.verifyotp = async (req, res) => {
+export const verifyotp = async (req, res) => {
   try {
     const { otp, email } = req.body;
 
@@ -236,7 +236,7 @@ module.exports.verifyotp = async (req, res) => {
   }
 };
 
-module.exports.logout = async (req, res, next) => {
+export const logout = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
     if (!token) {
