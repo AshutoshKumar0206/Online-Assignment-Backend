@@ -20,7 +20,8 @@ const twilioClient = twilio(accountSid, authToken);
 const twilioNumber = process.env.CONTACT;
 const RECAPTCHA_SECRET_KEY = process.env.CAPTCHA_SECRET;
 require('dotenv').config();
-const axios = require('axios')
+const axios = require('axios');
+const sendMail = require("../utils/mailsender");
 
 module.exports.signup = async (req, res, next) => {
   try {
