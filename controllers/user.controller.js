@@ -1,3 +1,4 @@
+import transporter from "../utils/mailsender";
 const userModel = require("../models/User");
 const jwt = require("jsonwebtoken");
 const notConfirmedModel = require("../models/notConfirmed");
@@ -170,11 +171,17 @@ export const sendotp = async (req, res) => {
 
     const otpPayload = { email, otp };
     const otpBody = await OTP.create(otpPayload);
-    const mailResponse = await mailSender(
-      email,
-      "Verification email",
-      emailTemplate(otp)
-    )
+    let mailResponse = await transporter.sendMail({
+      from: process.env.MAIL_USER,
+      to:`${email}`,
+      subject: "Verification Email",
+      html: emailTemplate(otp),
+    })
+    // const mailResponse = await mailSender(
+    //   email,
+    //   "Verification email",
+    //   emailTemplate(otp)
+    // )
     console.log("mail response:", mailResponse);
 
     return res.status(200).json({
