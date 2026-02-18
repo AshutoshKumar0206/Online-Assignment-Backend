@@ -1,4 +1,3 @@
-import transporter from "../utils/mailsender";
 const userModel = require("../models/User");
 const jwt = require("jsonwebtoken");
 const notConfirmedModel = require("../models/notConfirmed");
@@ -9,7 +8,7 @@ const otpGenerator = require("otp-generator");
 const OTP = require("../models/Otp");
 const emailTemplate = require("../mail/emailVerificationTemplate");
 const resetTemplate = require("../mail/resetPassOtp")
-const mailSender = require("../utils/mailsender");
+// const mailSender = require("../utils/mailsender");
 const passwordUpdateTemplate = require("../mail/PasswordUpdate");
 const contactUs = require('../models/ContactUs');
 const mongoose = require('mongoose');
@@ -23,7 +22,7 @@ const RECAPTCHA_SECRET_KEY = process.env.CAPTCHA_SECRET;
 require('dotenv').config();
 const axios = require('axios')
 
-export const signup = async (req, res, next) => {
+module.exports.signup = async (req, res, next) => {
   try {
     const { firstName, lastName, email, password, confirmPassword, role,rollNo, recaptchaToken } = req.body;
     if (!email || !password || !confirmPassword || !firstName || !lastName) {
@@ -90,7 +89,7 @@ export const signup = async (req, res, next) => {
   }
 };
 
-export const signin = async (req, res, next) => {
+module.exports.signin = async (req, res, next) => {
   try {
     const { email, password, recaptchaToken, failedAttempts } = req.body;
 
@@ -149,7 +148,7 @@ export const signin = async (req, res, next) => {
   }
 };
 
-export const sendotp = async (req, res) => {
+module.exports.sendotp = async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -171,12 +170,11 @@ export const sendotp = async (req, res) => {
 
     const otpPayload = { email, otp };
     const otpBody = await OTP.create(otpPayload);
-    let mailResponse = await transporter.sendMail({
-      from: process.env.MAIL_USER,
-      to:`${email}`,
-      subject: "Verification Email",
-      html: emailTemplate(otp),
-    })
+    await sendMail(
+      email,
+      "Verification Email",
+      emailTemplate(otp)
+    );
     // const mailResponse = await mailSender(
     //   email,
     //   "Verification email",
@@ -196,7 +194,7 @@ export const sendotp = async (req, res) => {
 };
 
 
-export const verifyotp = async (req, res) => {
+module.exports.verifyotp = async (req, res) => {
   try {
     const { otp, email } = req.body;
 
@@ -243,7 +241,7 @@ export const verifyotp = async (req, res) => {
   }
 };
 
-export const logout = async (req, res, next) => {
+module.exports.logout = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
     if (!token) {
