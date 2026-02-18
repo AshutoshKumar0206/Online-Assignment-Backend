@@ -4,10 +4,12 @@ const mailsender = async (email, title, body) => {
     try{
             let transporter = nodemailer.createTransport({
                 host:process.env.MAIL_HOST,
+                port: 587,
                 auth:{
                     user: process.env.MAIL_USER,
                     pass: process.env.MAIL_PASS,
-                }
+                },
+                connectionTimeout: 10000,
             })
 
 
@@ -18,9 +20,10 @@ const mailsender = async (email, title, body) => {
                 html: `${body}`,
             })
             // console.log('hello',info);
-            return { info };
+            return info;
     }
     catch(error) {
+       console.log(error);
        throw error;
         // console.log(error.message);
     }
