@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
-export const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
     host:process.env.MAIL_HOST,
     port: 587,
     auth:{
@@ -10,3 +10,4 @@ export const transporter = nodemailer.createTransport({
     },
     connectionTimeout: 10000,
 })
+module.exports = transporter;
