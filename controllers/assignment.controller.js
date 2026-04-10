@@ -486,14 +486,14 @@ module.exports.checkPlagiarism = async (req, res, next) => {
         { fileDetails },
         { headers: { 'Content-Type': 'application/json' } }
       );
-      console.log('data', mlResponse.data)
-      console.log("rubric", mlResponse.data.rubricResults);
-      console.log("results"mlResponse.data.results);
+      console.log('data:', mlResponse.data)
+      console.log("rubric:", mlResponse.data.rubricResults);
+      console.log("results:", mlResponse.data.results);
     } catch (err) {
-      // console.log(err);
+      console.log(err);
       return res.status(500).json({
         success: false,
-        message: 'Failed to connect to ML model',
+        message: `Failed to connect to ML model: ${err}`,
       });
     }
     
