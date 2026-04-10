@@ -480,13 +480,15 @@ module.exports.checkPlagiarism = async (req, res, next) => {
 
     let mlResponse;
     try {
+      console.log('url', mlUrl);
       mlResponse = await axios.post(
         `${mlUrl}/upload`,
         { fileDetails },
         { headers: { 'Content-Type': 'application/json' } }
       );
-      // console.log(mlResponse.data.rubricResults);
-      // console.log(mlResponse.data.results);
+      console.log('data', mlResponse.data)
+      console.log("rubric", mlResponse.data.rubricResults);
+      console.log("results"mlResponse.data.results);
     } catch (err) {
       // console.log(err);
       return res.status(500).json({
