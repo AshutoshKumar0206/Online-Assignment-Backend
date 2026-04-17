@@ -1,5 +1,5 @@
 // config/redisConfig.js
-const URL = require('url');
+const { URL } = require('url');
 console.log("DEBUG: Redis Url", process.env.REDIS_URL ? "DEFINED" : "NOT DEFINED");
 const redisUrl = new URL(process.env.REDIS_URL);
 module.exports = {
