@@ -21,6 +21,7 @@ router.get("/submission/:id", isAuthenticated, assignmentController.getAllAssign
 
 //route to update the assignment details
 router.put("/updateassignment/:id", isAuthenticated, assignmentController.updateAssignment);
+router.get("/get-plagiarism-report/:id", isAuthenticated, assignmentController.getPlagiarismReport);
 
 //route to get the submission of a particular student in the assignment
 router.get("/:assignmentId/:studentId", isAuthenticated, assignmentController.getAssignmentSubmission);

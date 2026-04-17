@@ -9,7 +9,9 @@ const upload = multer({ dest: 'uploads/' }); // Temporary storage before cloud u
 const mongoose = require('mongoose');
 const { response } = require('express');
 // const mlUrl = process.env.NODE_URL || "http://localhost:8081"
-const axios = require('axios')
+const axios = require('axios');
+const plagiarismQueue = require('../queue/plagiarismQueue');
+const plagiarismReportModel = require('../models/plagiarismReport.model');
 
 module.exports.createAssignment = async (req, res) => {
   const { id } = req.params; // Subject ID from route parameters
@@ -478,107 +480,21 @@ module.exports.checkPlagiarism = async (req, res, next) => {
       fileUrl: submission.fileURL,
     }));
 
-    let mlResponse;
-    try {
-      console.log('url', mlUrl);
-      mlResponse = await axios.post(
-        `${mlUrl}/upload`,
-        { fileDetails },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-      console.log('data:', mlResponse.data)
-      console.log("rubric:", mlResponse.data.rubricResults);
-      console.log("results:", mlResponse.data.results);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json({
-        success: false,
-        message: `Failed to connect to ML model: ${err}`,
-      });
-    }
-    
-    const results = await Promise.all(
-      mlResponse.data.results.map(async (response) => {
-        const student1 = await userModel
-          .findById(new mongoose.Types.ObjectId(response.studentId1))
-          .select('firstName lastName rollNo')
-          .exec();
-        const student2 = await userModel
-          .findById(new mongoose.Types.ObjectId(response.studentId2))
-          .select('firstName lastName rollNo')
-          .exec();
+    const queueJob = await plagiarismQueue.add("analyze-plagiarism", {
+      assignment_id: assignment_id,
+      fileDetails,
+      fileUrlMap,
+      submissions,
+      submitted,
+      late,
+      notSubmitted,
+      mlUrl: mlUrl,
+    });
 
-        return {
-          Assignment1: response.Assignment1,
-          Assignment2: response.Assignment2,
-          CosineSimilarity: response['Cosine Similarity (%)'],
-          JaccardSimilarity: response['Jaccard Similarity (%)'],
-          CombinedSimilarity: response['Combined Similarity (%)'],
-          studentId1: student1
-            ? {
-                name: `${student1.firstName} ${student1.lastName}`,
-                rollNo: student1.rollNo,
-                fileUrl: fileUrlMap[response.studentId1],
-                id: response.studentId1,
-              }
-            : { name: response.studentId1, rollNo: null, fileUrl: null, id: response.studentId1 },
-          studentId2: student2
-            ? {
-                name: `${student2.firstName} ${student2.lastName}`,
-                rollNo: student2.rollNo,
-                fileUrl: fileUrlMap[response.studentId2],
-                id: response.studentId2,
-              }
-            : { name: response.studentId2, rollNo: null, fileUrl: null, id: response.studentId2 },
-        };
-      })
-    );
-    
-    const rubricResults = await Promise.all(
-      mlResponse.data.rubricResults.map(async (response) => {
-        const student1 = await userModel
-          .findById(new mongoose.Types.ObjectId(response.StudentId))
-          .select('firstName lastName rollNo')
-          .exec();
-
-        return {
-          Assignment: response.Assignment,
-          CompletenessScore: response['Completeness Score'],
-          FinalRubricScore: response['Final Rubric Score (%)'],
-          GrammarScore: response['Grammar Score'],
-          OriginalityScore: response['Originality Score'],
-          StructureScore: response['Structure Score'],
-          studentId: student1
-            ? {
-                name: `${student1.firstName} ${student1.lastName}`,
-                rollNo: student1.rollNo,
-                fileUrl: fileUrlMap[response.StudentId],
-                id: response.StudentId,
-              }
-            : { name: response.StudentId, rollNo: null, fileUrl: null, id: response.StudentId },
-        };
-      })
-    ); 
-
-    const updatedSubmissions = submissions.map(submission => ({
-      studentId: submission.studentId._id,
-      firstName: submission.studentId.firstName,
-      lastName: submission.studentId.lastName,
-      rollNo: submission.studentId.rollNo,
-      fileURL: submission.fileURL,
-      status: submission.status,
-      grade: submission.grade,
-      feedback: submission.feedback,
-    }));
 
     return res.status(200).json({
       success: true,
       message: 'Submitted files sent to check Plagiarism',
-      mlResponse: { ...mlResponse.data, results, rubricResults },
-      submitted,
-      late,
-      notSubmitted,
-      submissions: updatedSubmissions,
     });
   } catch (err) {
     return res.status(500).json({
@@ -587,6 +503,31 @@ module.exports.checkPlagiarism = async (req, res, next) => {
     });
   }
 };
+
+module.exports.getPlagiarismReport = async (req, res, next) => {
+  try {
+    const assignmentId = req.params.id;
+    console.log(assignmentId);
+    const plagiarismReport = await plagiarismReportModel.findOne({assignmentId: assignmentId});
+    if (!plagiarismReport) {
+      return res.status(404).json({
+        success: false,
+        message: 'Plagiarism report not found',
+      });
+    }
+    console.log(plagiarismReport);
+    return res.status(200).json({
+      success: true,
+      message: 'Plagiarism report fetched successfully',
+      plagiarismReport,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+}
 
 module.exports.marksAndFeedback = async (req, res, next) => {
   try{

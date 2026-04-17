@@ -17,6 +17,7 @@ const assignmentRoutes = require("./routes/assignment.route");
 const subjectRoutes = require("./routes/subject.route.js");
 const notificationRoutes = require("./routes/notification.route.js");
 const feedbackRoutes = require("./routes/feedback.route.js");
+const workerService = require("./worker/plagiarismWorker.js");
 
 // Socket & App Initialization
 const { app, server } = require("./lib/socket.js");
@@ -60,7 +61,7 @@ app.use(limiter);
 // ---------------------------------------------------------
 connectDB();
 cloudinaryConnect(); // Uncomment if needed
-
+workerService;
 // ---------------------------------------------------------
 // 4. Routes
 // ---------------------------------------------------------
