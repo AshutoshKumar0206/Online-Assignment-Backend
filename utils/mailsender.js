@@ -5,7 +5,6 @@ const sendMail = async (email, subject, htmlContent) => {
     const client = SibApiV3Sdk.ApiClient.instance;
     const apiKey = client.authentications["api-key"];
     apiKey.apiKey = process.env.BREVO_API_KEY;
-    console.log(apiKey.apiKey);
 
     const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
