@@ -5,7 +5,7 @@ const redisUrl = new URL(process.env.REDIS_URL);
 module.exports = {
   host: redisUrl.hostname,
   port: redisUrl.port,
-  password: redisUrl.password, // URL object handles decoding automatically
+  password: process.env.REDIS_PASS || redisUrl.password, // URL object handles decoding automatically
   username: redisUrl.username || 'default', 
   maxRetriesPerRequest: null,
   tls: {

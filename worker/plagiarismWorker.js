@@ -143,7 +143,7 @@ const worker = new Worker('plagiarism-tasks', async (job) => {
     throw err; 
   }
 }, { connection: {
-  host: redisConfig.hostname,
+  host: redisConfig.host,
   port: redisConfig.port,
   password: redisConfig.password, // URL object handles decoding automatically
   username: redisConfig.username, 
