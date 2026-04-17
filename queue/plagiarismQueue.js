@@ -1,7 +1,7 @@
 const { Queue } = require('bullmq');
-const connection = require("../config/redisConfig")
+const redisConfig = require("../config/redisConfig")
 const plagiarismQueue = new Queue('plagiarism-tasks', {
-  connection
+  connection: redisConfig?.connection
 });
 
 module.exports = plagiarismQueue;
