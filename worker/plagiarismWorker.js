@@ -4,6 +4,7 @@ const User = require('../models/User');
 const mongoose = require("mongoose");
 const plagiarismReportModel = require('../models/plagiarismReport.model');
 const Submission = require('../models/Submission');
+const connnection = require("../config/redisConfig")
 
 // Import userModel, etc.
 console.log("worker is online and listening")
@@ -141,8 +142,7 @@ const worker = new Worker('plagiarism-tasks', async (job) => {
     // Throwing the error tells BullMQ the job failed (it will retry based on your queue config)
     throw err; 
   }
-}, { connection: { host: process.env.REDIS_HOST || '127.0.0.1', 
-    port: process.env.REDIS_PORT || 6379 } });
+}, { connection });
 
 worker.on('ready', () => {
   console.log("✅ Worker is online and listening!");
