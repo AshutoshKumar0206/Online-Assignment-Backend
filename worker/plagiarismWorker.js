@@ -4,7 +4,7 @@ const User = require('../models/User');
 const mongoose = require("mongoose");
 const plagiarismReportModel = require('../models/plagiarismReport.model');
 const Submission = require('../models/Submission');
-const connnection = require("../config/redisConfig")
+const connection = require("../config/redisConfig")
 
 // Import userModel, etc.
 console.log("worker is online and listening")
