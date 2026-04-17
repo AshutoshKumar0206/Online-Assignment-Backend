@@ -142,7 +142,7 @@ const worker = new Worker('plagiarism-tasks', async (job) => {
     // Throwing the error tells BullMQ the job failed (it will retry based on your queue config)
     throw err; 
   }
-}, { connection: redisConfig?.connection });
+}, { connection: {...redisConfig, url: redisConfig?.url} });
 
 worker.on('ready', () => {
   console.log("✅ Worker is online and listening!");
